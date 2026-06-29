@@ -57,6 +57,12 @@ a {
   text-decoration: none;
 }
 
+/* Allow Tailwind text-color utilities on <a>/<Link> to win over the inherit rule above */
+a[class*="text-white"]  { color: #ffffff; }
+a[class*="text-blue-"]  { color: revert-layer; }
+a[class*="text-slate-"] { color: revert-layer; }
+a[class*="text-indigo-"]{ color: revert-layer; }
+
 img {
   max-width: 100%;
   display: block;
@@ -98,7 +104,7 @@ img {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: var(--text);
+  color: var(--primary);
   font-size: 1.2rem;
   font-weight: 850;
 }
@@ -109,9 +115,9 @@ img {
   display: grid;
   place-items: center;
   border-radius: var(--radius);
-  background: var(--surface-strong);
+  background: var(--primary);
   color: #ffffff;
-  box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.18), 0 4px 12px rgba(37, 99, 235, 0.35);
   font-weight: 850;
 }
 
@@ -119,7 +125,67 @@ img {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* Desktop: show inline links, hide hamburger */
+.nav-desktop {
+  display: flex;
+}
+
+.nav-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 160ms ease;
+  flex-shrink: 0;
+}
+
+.nav-hamburger:hover {
+  background: var(--surface-soft);
+}
+
+/* Mobile dropdown */
+.nav-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.97);
+}
+
+.nav-mobile-link {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0 12px;
+}
+
+.nav-mobile-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
+  padding: 6px 0 0;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+/* Breakpoint: collapse to hamburger below 768px */
+@media (max-width: 768px) {
+  .nav-desktop {
+    display: none;
+  }
+
+  .nav-hamburger {
+    display: inline-flex;
+  }
 }
 
 .nav-link {

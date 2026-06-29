@@ -1,159 +1,147 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Bot, Globe, Smartphone, Plug, HeartPulse, Link as LinkIcon, BarChart3, ShieldCheck, Folder, Settings2 } from 'lucide-react';
 import SearchBar from '../../components/recruiter/SearchBar';
 import FilterPanel from '../../components/recruiter/FilterPanel';
 import LikeButton from '../../components/recruiter/LikeButton';
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-const MOCK_PROJECTS = [
-  {
-    id: '1',
-    title: 'AI-Powered Study Assistant',
-    description: 'A machine-learning chatbot that helps students plan their study schedule, summarise lecture notes, and generate practice quizzes automatically.',
-    student: { id: 's1', name: 'Ashan Perera', avatar: null },
-    technologies: ['Python', 'React', 'TensorFlow', 'FastAPI'],
-    category: 'Artificial Intelligence',
-    year: 2024,
-    likes: 42,
-    thumbnail: null,
-  },
-  {
-    id: '2',
-    title: 'Campus Event Management System',
-    description: 'A full-stack web app that lets students discover, register for, and manage campus events with QR-code ticketing and real-time seat tracking.',
-    student: { id: 's2', name: 'Nimasha Fernando', avatar: null },
-    technologies: ['React', 'Node.js', 'MongoDB', 'Express'],
-    category: 'Web Development',
-    year: 2024,
-    likes: 31,
-    thumbnail: null,
-  },
-  {
-    id: '3',
-    title: 'Smart Greenhouse IoT Controller',
-    description: 'An IoT dashboard to monitor and automate temperature, humidity, and irrigation in a greenhouse using Raspberry Pi sensors and a React frontend.',
-    student: { id: 's3', name: 'Dulshan Bandara', avatar: null },
-    technologies: ['React', 'Python', 'MQTT', 'InfluxDB'],
-    category: 'IoT',
-    year: 2023,
-    likes: 58,
-    thumbnail: null,
-  },
-  {
-    id: '4',
-    title: 'E-Commerce Mobile App',
-    description: 'A cross-platform mobile shopping app with product recommendations, cart, payments via Stripe, and real-time order tracking using push notifications.',
-    student: { id: 's4', name: 'Sachini Jayawardena', avatar: null },
-    technologies: ['React Native', 'Firebase', 'Stripe', 'Redux'],
-    category: 'Mobile Development',
-    year: 2024,
-    likes: 27,
-    thumbnail: null,
-  },
-  {
-    id: '5',
-    title: 'Hospital Appointment Portal',
-    description: 'A web portal streamlining outpatient appointment booking, doctor availability management, and automated SMS reminders for Sri Lankan hospitals.',
-    student: { id: 's5', name: 'Kavindra Silva', avatar: null },
-    technologies: ['Vue.js', 'Laravel', 'MySQL', 'Twilio'],
-    category: 'Healthcare',
-    year: 2023,
-    likes: 19,
-    thumbnail: null,
-  },
-  {
-    id: '6',
-    title: 'Blockchain Voting System',
-    description: 'A tamper-proof student union voting platform built on Ethereum smart contracts, with MetaMask authentication and transparent vote tallying.',
-    student: { id: 's6', name: 'Tharushi Rathnayake', avatar: null },
-    technologies: ['Solidity', 'React', 'Web3.js', 'Hardhat'],
-    category: 'Blockchain',
-    year: 2024,
-    likes: 65,
-    thumbnail: null,
-  },
-];
+import { MOCK_PROJECTS_LIST as MOCK_PROJECTS } from '../../data/mockProjects';
 
-// Gradient pool for project cards
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 const CARD_GRADIENTS = [
-  'from-violet-600 to-indigo-600',
+  'from-violet-600 to-indigo-500',
   'from-cyan-500 to-blue-600',
   'from-emerald-500 to-teal-600',
   'from-rose-500 to-pink-600',
-  'from-amber-500 to-orange-600',
+  'from-amber-500 to-orange-500',
   'from-fuchsia-500 to-purple-600',
+  'from-sky-500 to-cyan-600',
+  'from-green-500 to-emerald-600',
 ];
 
+const CATEGORY_ICONS = {
+  'Artificial Intelligence': <Bot className="w-3.5 h-3.5" />,
+  'Web Development': <Globe className="w-3.5 h-3.5" />,
+  'Mobile Development': <Smartphone className="w-3.5 h-3.5" />,
+  IoT: <Plug className="w-3.5 h-3.5" />,
+  Healthcare: <HeartPulse className="w-3.5 h-3.5" />,
+  Blockchain: <LinkIcon className="w-3.5 h-3.5" />,
+  'Data Science': <BarChart3 className="w-3.5 h-3.5" />,
+  Cybersecurity: <ShieldCheck className="w-3.5 h-3.5" />,
+};
+
+const SORT_OPTIONS = [
+  { value: 'likes', label: 'Most Liked' },
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'title', label: 'A → Z' },
+];
+
+// ─── Project Card ─────────────────────────────────────────────────────────────
 function ProjectCard({ project, index }) {
+  const gradient = CARD_GRADIENTS[index % CARD_GRADIENTS.length];
+  const icon = CATEGORY_ICONS[project.category] ?? <Folder className="w-3.5 h-3.5" />;
+
   return (
-    <Link
-      to={`/projects/${project.id}`}
-      className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-    >
-      {/* Thumbnail */}
-      <div className={`h-44 bg-gradient-to-br ${CARD_GRADIENTS[index % CARD_GRADIENTS.length]} relative flex items-center justify-center`}>
-        <span className="text-white/30 text-8xl font-black select-none">
+    <article className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 hover:border-violet-200 transition-all duration-300 hover:-translate-y-1">
+
+      {/* ── Thumbnail banner ── */}
+      <div className={`relative h-40 bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden`}>
+        {/* Large watermark letter */}
+        <span className="text-white/20 text-9xl font-black select-none leading-none">
           {project.title.charAt(0)}
         </span>
-        <span className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
+
+        {/* Category badge */}
+        <span className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
+          {icon}
           {project.category}
+        </span>
+
+        {/* Year badge */}
+        <span className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
+          {project.year}
         </span>
       </div>
 
-      {/* Content */}
+      {/* ── Card body ── */}
       <div className="flex flex-col flex-grow p-5 gap-3">
-        <h3 className="text-slate-800 font-bold text-lg leading-snug group-hover:text-violet-600 transition-colors">
+
+        {/* Title */}
+        <h2 className="text-slate-800 font-bold text-base leading-snug group-hover:text-blue-600 transition-colors line-clamp-2">
           {project.title}
-        </h3>
+        </h2>
+
+        {/* Description */}
         <p className="text-slate-500 text-sm leading-relaxed line-clamp-3 flex-grow">
           {project.description}
         </p>
 
-        {/* Tech tags */}
+        {/* Tech stack */}
         <div className="flex flex-wrap gap-1.5">
           {project.technologies.slice(0, 4).map(tech => (
             <span
               key={tech}
-              className="bg-slate-100 text-slate-600 text-xs font-medium px-2.5 py-0.5 rounded-full"
+              className="bg-violet-50 text-violet-700 text-xs font-medium px-2.5 py-0.5 rounded-full border border-violet-100"
             >
               {tech}
             </span>
           ))}
+          {project.technologies.length > 4 && (
+            <span className="bg-slate-100 text-slate-500 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              +{project.technologies.length - 4}
+            </span>
+          )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+        {/* ── Footer row ── */}
+        <div className="pt-3 mt-auto border-t border-slate-100 flex items-center justify-between gap-2">
+
+          {/* Student avatar + name */}
           <Link
             to={`/students/${project.student.id}`}
+            className="flex items-center gap-2 min-w-0 group/student"
             onClick={e => e.stopPropagation()}
-            className="flex items-center gap-2 group/student"
           >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+            <div className={`w-7 h-7 flex-shrink-0 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-xs font-bold shadow-sm`}>
               {project.student.name.charAt(0)}
             </div>
-            <span className="text-sm text-slate-600 group-hover/student:text-violet-600 transition-colors">
+            <span className="text-sm text-slate-600 truncate group-hover/student:text-blue-600 transition-colors">
               {project.student.name}
             </span>
           </Link>
+
+          {/* Likes */}
           <LikeButton projectId={project.id} initialLikes={project.likes} />
         </div>
+
+        {/* View Details button */}
+        <Link
+          to={`/projects/${project.id}`}
+          className="mt-1 block w-full text-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold py-2.5 rounded-xl shadow-sm shadow-blue-200 transition-all duration-200 hover:shadow-md hover:shadow-blue-300 active:scale-95"
+        >
+          View Details →
+        </Link>
       </div>
-    </Link>
+    </article>
   );
 }
 
+// ─── Main page ────────────────────────────────────────────────────────────────
 export default function Projects() {
-  const [projects, setProjects] = useState(MOCK_PROJECTS);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({ technology: '', category: '', year: '' });
+  const [sortBy, setSortBy] = useState('likes');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const filtered = projects.filter(p => {
+  // Filter
+  const filtered = MOCK_PROJECTS.filter(p => {
     const q = searchQuery.toLowerCase();
     const matchSearch =
       !q ||
       p.title.toLowerCase().includes(q) ||
       p.student.name.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q) ||
       p.technologies.some(t => t.toLowerCase().includes(q));
 
     const matchTech = !filters.technology || p.technologies.includes(filters.technology);
@@ -163,68 +151,131 @@ export default function Projects() {
     return matchSearch && matchTech && matchCat && matchYear;
   });
 
+  // Sort
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'likes') return b.likes - a.likes;
+    if (sortBy === 'newest') return b.year - a.year;
+    if (sortBy === 'oldest') return a.year - b.year;
+    if (sortBy === 'title') return a.title.localeCompare(b.title);
+    return 0;
+  });
+
+  const hasActiveFilter = searchQuery || Object.values(filters).some(Boolean);
+
+  const clearAll = () => {
+    setSearchQuery('');
+    setFilters({ technology: '', category: '', year: '' });
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Hero banner */}
-      <div className="bg-gradient-to-br from-violet-700 via-indigo-700 to-blue-700 text-white py-16 px-6">
+
+      {/* ── Hero ── */}
+      <div className="bg-gradient-to-br from-violet-700 via-indigo-700 to-blue-700 text-white pt-14 pb-20 px-6">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-violet-300 text-sm font-semibold uppercase tracking-widest mb-3">
+          <span className="inline-block bg-white/15 backdrop-blur-sm text-violet-200 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-5">
             ProjectSphere
-          </p>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
-            Student Projects Showcase
+          </span>
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+            Explore Projects
           </h1>
-          <p className="text-indigo-200 text-lg max-w-2xl mx-auto mb-8">
-            Discover innovative projects built by talented undergraduates. Find your next hire or collaborate with bright minds.
+          <p className="text-indigo-200 text-lg max-w-xl mx-auto mb-8">
+            Browse innovative projects built by talented undergraduates. Discover skills, connect with students, and find your next hire.
           </p>
+
+          {/* Search bar */}
           <SearchBar value={searchQuery} onChange={setSearchQuery} />
+
+          {/* Stats strip */}
+          <div className="flex items-center justify-center gap-8 mt-8 text-sm text-indigo-200">
+            <span><strong className="text-white text-lg font-bold">{MOCK_PROJECTS.length}</strong> Projects</span>
+            <span className="w-px h-5 bg-white/20" />
+            <span><strong className="text-white text-lg font-bold">8</strong> Students</span>
+            <span className="w-px h-5 bg-white/20" />
+            <span><strong className="text-white text-lg font-bold">6</strong> Categories</span>
+          </div>
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="max-w-7xl mx-auto px-4 py-10">
+      {/* ── Body ── */}
+      <div className="max-w-7xl mx-auto px-4 -mt-6 pb-16">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar filter */}
+
+          {/* ── Sidebar ── */}
           <aside className="lg:w-64 flex-shrink-0">
             <div className="lg:sticky lg:top-6">
               {/* Mobile toggle */}
               <button
+                id="filter-toggle"
                 onClick={() => setIsFilterOpen(v => !v)}
                 className="lg:hidden w-full flex items-center justify-between bg-white border border-slate-200 rounded-xl px-4 py-3 mb-3 text-sm font-semibold text-slate-700 shadow-sm"
               >
-                <span>🎛 Filters</span>
-                <span>{isFilterOpen ? '▲' : '▼'}</span>
+                <span className="flex items-center gap-2"><Settings2 className="w-4 h-4" /> Filters {hasActiveFilter && <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-600 text-white text-xs rounded-full">!</span>}</span>
+                <span className="text-slate-400">{isFilterOpen ? '▲' : '▼'}</span>
               </button>
+
               <div className={`${isFilterOpen ? 'block' : 'hidden'} lg:block`}>
                 <FilterPanel filters={filters} onChange={setFilters} />
               </div>
             </div>
           </aside>
 
-          {/* Project grid */}
+          {/* ── Project grid ── */}
           <div className="flex-grow">
-            <div className="flex items-center justify-between mb-6">
+
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6 bg-white rounded-2xl border border-slate-200 px-4 py-3 shadow-sm">
               <p className="text-slate-500 text-sm">
-                Showing <span className="font-semibold text-slate-700">{filtered.length}</span> projects
+                Showing{' '}
+                <span className="font-semibold text-slate-800">{sorted.length}</span>{' '}
+                of{' '}
+                <span className="font-semibold text-slate-800">{MOCK_PROJECTS.length}</span>{' '}
+                projects
               </p>
-              {(searchQuery || Object.values(filters).some(Boolean)) && (
+
+              <div className="flex items-center gap-3">
+                {hasActiveFilter && (
+                  <button
+                    onClick={clearAll}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-semibold underline underline-offset-2 transition-colors"
+                  >
+                    Clear filters
+                  </button>
+                )}
+
+                {/* Sort selector */}
+                <div className="flex items-center gap-2">
+                  <label htmlFor="sort-select" className="text-xs text-slate-500 font-medium hidden sm:block">Sort:</label>
+                  <select
+                    id="sort-select"
+                    value={sortBy}
+                    onChange={e => setSortBy(e.target.value)}
+                    className="text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-violet-400 cursor-pointer"
+                  >
+                    {SORT_OPTIONS.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Empty state */}
+            {sorted.length === 0 ? (
+              <div className="text-center py-28">
+                <p className="text-6xl mb-5">🔍</p>
+                <h2 className="text-xl font-bold text-slate-700 mb-2">No projects found</h2>
+                <p className="text-slate-400 text-sm mb-6">Try adjusting your search or filters.</p>
                 <button
-                  onClick={() => { setSearchQuery(''); setFilters({ technology: '', category: '', year: '' }); }}
-                  className="text-sm text-violet-600 hover:text-violet-800 font-medium underline"
+                  onClick={clearAll}
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
                 >
                   Clear all filters
                 </button>
-              )}
-            </div>
-
-            {filtered.length === 0 ? (
-              <div className="text-center py-24">
-                <p className="text-6xl mb-4">🔍</p>
-                <p className="text-slate-500 text-lg">No projects match your search.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filtered.map((project, i) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                {sorted.map((project, i) => (
                   <ProjectCard key={project.id} project={project} index={i} />
                 ))}
               </div>

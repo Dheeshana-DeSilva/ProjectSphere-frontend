@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 
@@ -10,6 +11,11 @@ const dashboardContent = {
       { label: 'My projects', value: '03' },
       { label: 'Pending review', value: '01' },
       { label: 'Profile views', value: '28' },
+    ],
+    nav: [
+      { label: 'Dashboard', to: '/dashboard/student' },
+      { label: 'My projects', to: '/student/projects' },
+      { label: 'Create project', to: '/student/projects/create' },
     ],
     actions: [
       { label: 'Create project', to: '/student/projects/create', variant: 'button-primary' },
@@ -26,6 +32,10 @@ const dashboardContent = {
       { label: 'Approved this week', value: '08' },
       { label: 'Rejected drafts', value: '03' },
     ],
+    nav: [
+      { label: 'Dashboard', to: '/dashboard/lecturer' },
+      { label: 'Approvals', to: '/lecturer/approvals' },
+    ],
     actions: [
       { label: 'Open approvals', to: '/lecturer/approvals', variant: 'button-primary' },
       { label: 'Browse projects', to: '/projects', variant: 'button-secondary' },
@@ -41,9 +51,13 @@ const dashboardContent = {
       { label: 'Followed students', value: '07' },
       { label: 'New projects', value: '21' },
     ],
+    nav: [
+      { label: 'Dashboard', to: '/dashboard/recruiter' },
+      { label: 'Saved projects', to: '/recruiter/saved' },
+      { label: 'Followed students', to: '/recruiter/followed' },
+    ],
     actions: [
       { label: 'Explore projects', to: '/projects', variant: 'button-primary' },
-      { label: 'Saved projects', to: '/recruiter/saved', variant: 'button-secondary' },
     ],
     tasks: ['Shortlist web app projects', 'Follow top data science students', 'Review new approved submissions'],
   },
@@ -52,6 +66,33 @@ const dashboardContent = {
 function Dashboard({ role }) {
   const { roleLabels, user } = useAuth();
   const content = dashboardContent[role] || dashboardContent.student;
+
+  const [tasks, setTasks] = useState(() => 
+    content.tasks.map((t, i) => ({ id: Date.now() + i, text: t, done: false }))
+  );
+  const [newTask, setNewTask] = useState('');
+
+  // Reset tasks if role changes
+  useEffect(() => {
+    setTasks(content.tasks.map((t, i) => ({ id: Date.now() + i, text: t, done: false })));
+  }, [role, content.tasks]);
+
+  const toggleTask = (id) => {
+    // Mark as done immediately for UI feedback
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: true } : t));
+    
+    // Remove it after a short delay
+    setTimeout(() => {
+      setTasks(prev => prev.filter(t => t.id !== id));
+    }, 300);
+  };
+
+  const addTask = (e) => {
+    e.preventDefault();
+    if (!newTask.trim()) return;
+    setTasks(prev => [...prev, { id: Date.now(), text: newTask.trim(), done: false }]);
+    setNewTask('');
+  };
 
   return (
     <section className="dashboard-page">
@@ -63,8 +104,8 @@ function Dashboard({ role }) {
             <p>{user.email}</p>
           </div>
           <nav className="dashboard-menu" aria-label="Dashboard navigation">
-            {content.actions.map((action) => (
-              <Link key={action.to} to={action.to}>{action.label}</Link>
+            {content.nav.map((link) => (
+              <Link key={link.to} to={link.to}>{link.label}</Link>
             ))}
           </nav>
         </aside>
@@ -98,12 +139,32 @@ function Dashboard({ role }) {
               <h2>Next actions</h2>
             </div>
             <div className="task-list">
-              {content.tasks.map((task) => (
-                <label className="task-item" key={task}>
-                  <input type="checkbox" />
-                  <span>{task}</span>
-                </label>
-              ))}
+              {tasks.length === 0 ? (
+                <p className="text-slate-400 text-sm italic">All tasks completed!</p>
+              ) : (
+                tasks.map((task) => (
+                  <label className={`task-item transition-all duration-300 ${task.done ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`} key={task.id}>
+                    <input
+                      type="checkbox"
+                      checked={task.done}
+                      onChange={() => toggleTask(task.id)}
+                    />
+                    <span className={task.done ? 'line-through text-slate-400' : ''}>{task.text}</span>
+                  </label>
+                ))
+              )}
+              <form onSubmit={addTask} className="mt-4 flex gap-2">
+                <input
+                  type="text"
+                  value={newTask}
+                  onChange={e => setNewTask(e.target.value)}
+                  placeholder="Add a new task..."
+                  className="flex-grow text-sm px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                <button type="submit" disabled={!newTask.trim()} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-sm font-semibold disabled:opacity-50">
+                  Add
+                </button>
+              </form>
             </div>
           </div>
         </div>

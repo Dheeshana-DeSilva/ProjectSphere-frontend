@@ -9,7 +9,11 @@ import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import NotFound from './pages/NotFound.jsx';
 import PlaceholderPage from './pages/PlaceholderPage.jsx';
-import Projects from './pages/Projects.jsx';
+import Projects from './pages/recruiter/Projects.jsx';
+import ProjectDetails from './pages/recruiter/ProjectDetails.jsx';
+import StudentProfile from './pages/recruiter/StudentProfile.jsx';
+import SavedProjects from './pages/recruiter/SavedProjects.jsx';
+import FollowedStudents from './pages/recruiter/FollowedStudents.jsx';
 import Register from './pages/Register.jsx';
 
 function App() {
@@ -21,7 +25,10 @@ function App() {
           <main className="main-content">
             <Routes>
               <Route path="/" element={<Home />} />
+              {/* ── Public / Recruiter routes ── */}
               <Route path="/projects" element={<Projects />} />
+              <Route path="/projects/:id" element={<ProjectDetails />} />
+              <Route path="/students/:id" element={<StudentProfile />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
@@ -86,7 +93,15 @@ function App() {
                 path="/recruiter/saved"
                 element={(
                   <ProtectedRoute allowedRoles={['recruiter']}>
-                    <PlaceholderPage title="Saved projects" role="Recruiter" />
+                    <SavedProjects />
+                  </ProtectedRoute>
+                )}
+              />
+              <Route
+                path="/recruiter/followed"
+                element={(
+                  <ProtectedRoute allowedRoles={['recruiter']}>
+                    <FollowedStudents />
                   </ProtectedRoute>
                 )}
               />

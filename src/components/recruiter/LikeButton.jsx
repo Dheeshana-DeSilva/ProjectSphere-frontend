@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Heart } from 'lucide-react';
 
 /**
  * LikeButton — toggles a like on a project.
@@ -38,8 +39,8 @@ export default function LikeButton({ projectId, initialLikes = 0, large = false 
             : 'bg-slate-100 text-slate-500 hover:bg-rose-50 hover:text-rose-500'
         }`}
       >
-        <span className={`text-3xl transition-transform duration-200 ${animating ? 'scale-125' : 'scale-100'}`}>
-          {liked ? '❤️' : '🤍'}
+        <span className={`transition-transform duration-200 ${animating ? 'scale-125' : 'scale-100'}`}>
+          <Heart className={`w-8 h-8 ${liked ? 'fill-current text-rose-500' : 'text-slate-400'}`} />
         </span>
         <span>{count} {count === 1 ? 'Like' : 'Likes'}</span>
       </button>
@@ -58,7 +59,7 @@ export default function LikeButton({ projectId, initialLikes = 0, large = false 
       }`}
     >
       <span className={`transition-transform duration-200 ${animating ? 'scale-150' : 'scale-100'}`}>
-        {liked ? '❤️' : '🤍'}
+        <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
       </span>
       <span>{count}</span>
     </button>

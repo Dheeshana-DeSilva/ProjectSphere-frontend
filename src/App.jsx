@@ -15,6 +15,9 @@ import StudentProfile from './pages/recruiter/StudentProfile.jsx';
 import SavedProjects from './pages/recruiter/SavedProjects.jsx';
 import FollowedStudents from './pages/recruiter/FollowedStudents.jsx';
 import Register from './pages/Register.jsx';
+import MyProjects from './components/projects/MyProjects.jsx'
+import CreateProject from './components/projects/CreateProject.jsx'
+import EditProject from './components/projects/EditProject.jsx'
 
 function App() {
   return (
@@ -68,16 +71,24 @@ function App() {
               <Route
                 path="/student/projects"
                 element={(
-                  <ProtectedRoute allowedRoles={['student']}>
-                    <PlaceholderPage title="My projects" role="Student" />
+                  <ProtectedRoute allowedRoles={["student"]}>
+                    <MyProjects />
                   </ProtectedRoute>
                 )}
               />
               <Route
                 path="/student/projects/create"
                 element={(
-                  <ProtectedRoute allowedRoles={['student']}>
-                    <PlaceholderPage title="Create project" role="Student" />
+                  <ProtectedRoute allowedRoles={["student"]}>
+                    <CreateProject />
+                  </ProtectedRoute>
+                )}
+              />
+              <Route
+                path="/projects/:id/edit"
+                element={(
+                  <ProtectedRoute allowedRoles={["student"]}>
+                    <EditProject />
                   </ProtectedRoute>
                 )}
               />

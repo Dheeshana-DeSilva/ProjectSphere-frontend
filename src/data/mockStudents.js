@@ -1,6 +1,6 @@
 import { MOCK_PROJECTS_LIST } from './mockProjects';
 
-// Generate mock student profiles based on the students defined in the projects.
+// mock student profiles based on the students defined in the projects.
 export const MOCK_STUDENTS = {
   's1': {
     id: 's1',

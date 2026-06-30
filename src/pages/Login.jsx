@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAlert } from '../hooks/useAlert.js';
 import { useAuth } from '../hooks/useAuth.js';
 
 const initialForm = {
@@ -10,8 +11,8 @@ const initialForm = {
 
 function Login() {
   const [form, setForm] = useState(initialForm);
-  const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showAlert } = useAlert();
   const { dashboardPaths, login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,30 +29,28 @@ function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError('');
     setIsSubmitting(true);
 
     try {
       const result = await login(form);
+      showAlert({ type: 'success', title: 'Welcome back!', message: `Signed in as ${result.user.name}.` });
       redirectAfterAuth(result.user.role);
     } catch (err) {
-      setError(err.message);
+      showAlert({ type: 'error', title: 'Sign-in failed', message: err.message });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setError('');
-
     try {
       const result = await loginWithGoogle(form.role);
-
       if (result) {
+        showAlert({ type: 'success', title: 'Welcome!', message: `Signed in with Google as ${result.user.name}.` });
         redirectAfterAuth(result.user.role);
       }
     } catch {
-      setError('Google login could not be started.');
+      showAlert({ type: 'error', title: 'Google sign-in failed', message: 'Google login could not be started.' });
     }
   };
 
@@ -59,6 +58,37 @@ function Login() {
     <section className="auth-layout">
       <div className="auth-shell split">
         <div className="auth-visual">
+          {/* Animated background elements */}
+          <div className="av-bg-mesh" aria-hidden="true" />
+          <div className="av-orb av-orb-1" aria-hidden="true" />
+          <div className="av-orb av-orb-2" aria-hidden="true" />
+          <div className="av-orb av-orb-3" aria-hidden="true" />
+          <div className="av-orb av-orb-4" aria-hidden="true" />
+          <svg className="av-constellation" viewBox="0 0 400 500" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="60" cy="80" r="3" fill="rgba(255,255,255,0.55)" />
+            <circle cx="180" cy="40" r="2" fill="rgba(255,255,255,0.4)" />
+            <circle cx="300" cy="100" r="2.5" fill="rgba(255,255,255,0.5)" />
+            <circle cx="340" cy="200" r="2" fill="rgba(255,255,255,0.35)" />
+            <circle cx="260" cy="300" r="3" fill="rgba(255,255,255,0.45)" />
+            <circle cx="80" cy="340" r="2" fill="rgba(255,255,255,0.4)" />
+            <circle cx="150" cy="420" r="2.5" fill="rgba(255,255,255,0.3)" />
+            <circle cx="360" cy="380" r="2" fill="rgba(255,255,255,0.38)" />
+            <circle cx="200" cy="200" r="1.5" fill="rgba(255,255,255,0.55)" />
+            <circle cx="120" cy="180" r="1.5" fill="rgba(255,255,255,0.3)" />
+            <line x1="60" y1="80" x2="180" y2="40" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+            <line x1="180" y1="40" x2="300" y2="100" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="300" y1="100" x2="340" y2="200" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+            <line x1="340" y1="200" x2="260" y2="300" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="260" y1="300" x2="80" y2="340" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+            <line x1="80" y1="340" x2="150" y2="420" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+            <line x1="60" y1="80" x2="120" y2="180" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+            <line x1="120" y1="180" x2="200" y2="200" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="200" y1="200" x2="260" y2="300" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+          </svg>
+          <div className="av-ring av-ring-1" aria-hidden="true" />
+          <div className="av-ring av-ring-2" aria-hidden="true" />
+          <div className="av-glow" aria-hidden="true" />
+
           <div className="visual-inner">
             <span className="visual-tag">ProjectSphere workspace</span>
             <h1>Welcome back!</h1>
@@ -85,8 +115,6 @@ function Login() {
             <h2 className="section-title">Sign In</h2>
             <p className="page-copy">Use your account to access ProjectSphere.</p>
           </div>
-
-          {error && <div className="alert alert-error">{error}</div>}
 
           <form className="form-stack" onSubmit={handleSubmit}>
             <div className="form-field">

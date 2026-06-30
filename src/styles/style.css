@@ -58,10 +58,21 @@ a {
 }
 
 /* Allow Tailwind text-color utilities on <a>/<Link> to win over the inherit rule above */
-a[class*="text-white"]  { color: #ffffff; }
-a[class*="text-blue-"]  { color: revert-layer; }
-a[class*="text-slate-"] { color: revert-layer; }
-a[class*="text-indigo-"]{ color: revert-layer; }
+a[class*="text-white"] {
+  color: #ffffff;
+}
+
+a[class*="text-blue-"] {
+  color: revert-layer;
+}
+
+a[class*="text-slate-"] {
+  color: revert-layer;
+}
+
+a[class*="text-indigo-"] {
+  color: revert-layer;
+}
 
 img {
   max-width: 100%;
@@ -357,8 +368,8 @@ img {
 .auth-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 .auth-brand .brand-mark {
@@ -526,14 +537,14 @@ img {
 }
 
 .auth-layout {
-  min-height: calc(100vh - 145px);
+  min-height: calc(100vh - 72px);
   display: grid;
   place-items: center;
-  padding: 48px 16px;
+  padding: 16px;
 }
 
 .auth-layout.auth-center {
-  background: linear-gradient(180deg, rgba(37,99,235,0.03), rgba(255,255,255,0));
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.03), rgba(255, 255, 255, 0));
 }
 
 .auth-card-centered {
@@ -567,23 +578,23 @@ img {
 }
 
 .auth-shell {
-  width: min(100%, 980px);
+  width: min(100%, 860px);
   display: grid;
-  grid-template-columns: minmax(280px, 0.82fr) minmax(360px, 1fr);
+  grid-template-columns: minmax(240px, 0.82fr) minmax(320px, 1fr);
   gap: 18px;
   align-items: start;
 }
 
 .auth-shell-wide {
-  width: min(100%, 1120px);
-  grid-template-columns: minmax(280px, 0.7fr) minmax(520px, 1.3fr);
+  width: min(100%, 1000px);
+  grid-template-columns: minmax(240px, 0.7fr) minmax(460px, 1.3fr);
 }
 
 .auth-aside {
   display: grid;
   align-content: start;
-  gap: 24px;
-  padding: 30px;
+  gap: 16px;
+  padding: 22px;
   background:
     linear-gradient(140deg, rgba(37, 99, 235, 0.12), rgba(15, 118, 110, 0.08)),
     #ffffff;
@@ -591,68 +602,230 @@ img {
 
 /* Split layout (visual + card) similar to provided design */
 .auth-shell.split {
-  width: min(100%, 980px);
+  width: min(100%, 860px);
   display: grid;
-  grid-template-columns: 1fr 460px;
+  grid-template-columns: 1fr 400px;
   gap: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: var(--shadow);
-  align-items: stretch; /* ensure left visual stretches to match card height */
+  align-items: stretch;
 }
 
 .auth-visual {
   background:
-    radial-gradient(circle at 18% 18%, rgba(255,255,255,0.24), rgba(255,255,255,0) 20%),
-    radial-gradient(circle at 82% 20%, rgba(255,255,255,0.12), rgba(255,255,255,0) 14%),
-    radial-gradient(circle at 72% 80%, rgba(255,255,255,0.08), rgba(255,255,255,0) 24%),
-    linear-gradient(135deg, var(--primary), var(--primary-dark));
+    linear-gradient(145deg, #1a4fd6 0%, #1e3fa8 40%, #0f2d8c 75%, #0a1e6e 100%);
   color: #ffffff;
-  padding: 44px 40px 28px;
+  padding: 32px 28px 22px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 18px;
+  gap: 12px;
   position: relative;
   overflow: hidden;
 }
 
-.auth-visual::before {
-  content: "";
+/* ── Dotted grid mesh ── */
+.av-bg-mesh {
   position: absolute;
-  right: -96px;
-  top: 24px;
-  width: 200px;
-  height: 200px;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+}
+
+/* ── Floating orbs ── */
+@keyframes av-float-1 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(12px, -18px) scale(1.04);
+  }
+
+  66% {
+    transform: translate(-8px, 10px) scale(0.97);
+  }
+}
+
+@keyframes av-float-2 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  40% {
+    transform: translate(-14px, 16px) scale(1.06);
+  }
+
+  70% {
+    transform: translate(10px, -8px) scale(0.95);
+  }
+}
+
+@keyframes av-float-3 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(8px, 20px) scale(1.08);
+  }
+}
+
+@keyframes av-float-4 {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  45% {
+    transform: translate(-10px, -14px) scale(1.05);
+  }
+
+  80% {
+    transform: translate(6px, 6px) scale(0.96);
+  }
+}
+
+.av-orb {
+  position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.35);
-  box-shadow: 0 0 0 32px rgba(255,255,255,0.1);
-  opacity: 0.85;
-  transform: translate(10%, -10%);
   pointer-events: none;
+  z-index: 0;
 }
 
-.auth-visual::after {
-  content: "";
+.av-orb-1 {
+  width: 260px;
+  height: 260px;
+  top: -80px;
+  right: -80px;
+  background: radial-gradient(circle at 40% 40%,
+      rgba(99, 179, 255, 0.35),
+      rgba(37, 99, 235, 0.18) 55%,
+      transparent 75%);
+  filter: blur(2px);
+  animation: av-float-1 9s ease-in-out infinite;
+}
+
+.av-orb-2 {
+  width: 180px;
+  height: 180px;
+  bottom: -50px;
+  left: -60px;
+  background: radial-gradient(circle at 60% 60%,
+      rgba(139, 92, 246, 0.4),
+      rgba(79, 70, 229, 0.18) 55%,
+      transparent 75%);
+  filter: blur(3px);
+  animation: av-float-2 11s ease-in-out infinite;
+}
+
+.av-orb-3 {
+  width: 120px;
+  height: 120px;
+  top: 45%;
+  right: -30px;
+  background: radial-gradient(circle at 50% 50%,
+      rgba(56, 189, 248, 0.3),
+      rgba(14, 165, 233, 0.12) 60%,
+      transparent 80%);
+  filter: blur(1px);
+  animation: av-float-3 7s ease-in-out infinite;
+}
+
+.av-orb-4 {
+  width: 90px;
+  height: 90px;
+  top: 20%;
+  left: 15%;
+  background: radial-gradient(circle at 50% 50%,
+      rgba(255, 255, 255, 0.22),
+      transparent 70%);
+  filter: blur(1px);
+  animation: av-float-4 13s ease-in-out infinite;
+}
+
+/* ── Constellation SVG ── */
+.av-constellation {
   position: absolute;
-  left: -46px;
-  bottom: -28px;
-  width: 150px;
-  height: 100px;
-  border-top-right-radius: 120px;
-  border-bottom-right-radius: 120px;
-  border-bottom-left-radius: 0;
-  border-top-left-radius: 0;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.22);
-  filter: blur(0.1px);
-  opacity: 0.82;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+  z-index: 1;
+  opacity: 0.7;
 }
 
-.auth-visual::before,
-.auth-visual::after {
-  mix-blend-mode: screen;
+/* ── Pulsing rings ── */
+@keyframes av-pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.25;
+  }
+
+  100% {
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+}
+
+.av-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+  z-index: 1;
+  animation: av-pulse-ring 6s ease-in-out infinite;
+}
+
+.av-ring-1 {
+  width: 220px;
+  height: 220px;
+  top: -50px;
+  right: -50px;
+  animation-delay: 0s;
+}
+
+.av-ring-2 {
+  width: 320px;
+  height: 320px;
+  top: -100px;
+  right: -100px;
+  opacity: 0.35;
+  animation-delay: 1.5s;
+}
+
+/* ── Bottom glow ── */
+.av-glow {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 340px;
+  height: 160px;
+  background: radial-gradient(ellipse at center,
+      rgba(99, 102, 241, 0.45) 0%,
+      rgba(37, 99, 235, 0.12) 55%,
+      transparent 75%);
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .visual-inner {
@@ -662,15 +835,15 @@ img {
 
 .auth-visual h1 {
   margin: 0;
-  font-size: 2rem;
-  line-height: 1.05;
+  font-size: 1.55rem;
+  line-height: 1.1;
   font-weight: 900;
 }
 
 .auth-visual .visual-sub {
   margin: 0;
-  color: rgba(255,255,255,0.95);
-  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.88rem;
 }
 
 .visual-tag {
@@ -678,43 +851,43 @@ img {
   align-items: center;
   justify-content: center;
   width: fit-content;
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.92);
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
-  padding: 10px 14px;
-  margin-bottom: 18px;
+  padding: 6px 11px;
+  margin-bottom: 10px;
 }
 
 .visual-panel {
   display: grid;
-  gap: 14px;
-  margin-top: 22px;
+  gap: 8px;
+  margin-top: 14px;
   position: relative;
   z-index: 2;
 }
 
 .visual-panel-item {
   display: grid;
-  gap: 6px;
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.16);
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .visual-panel-item strong {
-  font-size: 1.35rem;
+  font-size: 1rem;
   color: #ffffff;
 }
 
 .visual-panel-item span {
-  color: rgba(255,255,255,0.82);
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.78rem;
 }
 
 .auth-visual .visual-decor {
@@ -725,8 +898,65 @@ img {
 }
 
 .split-card {
-  padding: 36px 34px;
+  padding: 22px 26px;
   border-radius: 0;
+}
+
+/* Compact overrides scoped to split-card so other forms are unaffected */
+.split-card .form-stack {
+  gap: 10px;
+}
+
+.split-card .form-row {
+  gap: 10px;
+}
+
+.split-card .form-field {
+  gap: 5px;
+}
+
+.split-card .form-field label {
+  font-size: 0.82rem;
+}
+
+.split-card .form-field input,
+.split-card .form-field select {
+  min-height: 38px;
+  padding: 0 11px;
+  font-size: 0.9rem;
+}
+
+.split-card .button {
+  min-height: 38px;
+}
+
+.split-card .section-title {
+  font-size: 1.3rem;
+  margin: 4px 0 2px;
+}
+
+.split-card .page-copy {
+  font-size: 0.84rem;
+  margin: 4px 0 0;
+}
+
+.split-card .auth-switch {
+  margin: 10px 0 0;
+  font-size: 0.84rem;
+}
+
+.split-card .divider {
+  font-size: 0.8rem;
+}
+
+.split-card .auth-card-top {
+  margin-bottom: 4px;
+}
+
+.split-card .auth-brand .brand-mark {
+  width: 32px;
+  height: 32px;
+  font-size: 0.82rem;
 }
 
 .auth-card-top .auth-brand .brand-mark {
@@ -741,10 +971,10 @@ img {
 }
 
 .form-actions-row {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 @media (max-width: 900px) {
@@ -1508,5 +1738,201 @@ img {
 
   .footer-inner {
     padding: 18px 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   TOAST / ALERT NOTIFICATION SYSTEM
+═══════════════════════════════════════════════ */
+
+/* ── Container ── */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  pointer-events: none;
+}
+
+/* ── Entry / exit keyframes ── */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(100% + 24px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+    max-height: 120px;
+    margin-bottom: 0;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(calc(100% + 24px));
+    max-height: 0;
+    margin-bottom: -10px;
+  }
+}
+
+@keyframes toast-progress {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* ── Base toast card ── */
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 14px 14px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow:
+    0 4px 6px rgba(23, 32, 51, 0.06),
+    0 10px 28px rgba(23, 32, 51, 0.12),
+    0 0 0 1px rgba(23, 32, 51, 0.06);
+  pointer-events: all;
+  position: relative;
+  overflow: hidden;
+  animation: toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.toast.toast-exit {
+  animation: toast-out 300ms cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+
+/* ── Left accent stripe ── */
+.toast::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 10px 0 0 10px;
+}
+
+/* ── Icon ── */
+.toast-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+}
+
+.toast-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Body ── */
+.toast-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.toast-title {
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.toast-message {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+/* ── Close button ── */
+.toast-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  margin-top: -2px;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.toast-close:hover {
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+.toast-close svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* ── Progress bar ── */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 0 0 0 10px;
+  animation: toast-progress 4s linear both;
+}
+
+/* ── Colour variants ── */
+
+/* Success — green */
+.toast-success::before     { background: var(--accent); }
+.toast-success .toast-icon { color: var(--accent); }
+.toast-success .toast-progress { background: var(--accent); }
+
+/* Error — red */
+.toast-error::before       { background: var(--danger); }
+.toast-error .toast-icon   { color: var(--danger); }
+.toast-error .toast-progress { background: var(--danger); }
+
+/* Warning — gold */
+.toast-warning::before     { background: var(--gold); }
+.toast-warning .toast-icon { color: var(--gold); }
+.toast-warning .toast-progress { background: var(--gold); }
+
+/* Info — blue */
+.toast-info::before        { background: var(--primary); }
+.toast-info .toast-icon    { color: var(--primary); }
+.toast-info .toast-progress { background: var(--primary); }
+
+/* ── Accessibility: reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast.toast-exit {
+    animation: none;
+    transition: opacity 200ms ease;
+  }
+  .toast.toast-exit { opacity: 0; }
+  .toast-progress { animation: none; }
+}
+
+/* ── Responsive: full-width on small screens ── */
+@media (max-width: 420px) {
+  .toast-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
   }
 }

@@ -57,25 +57,33 @@ function Login() {
 
   return (
     <section className="auth-layout">
-      <div className="auth-shell">
-        <div className="auth-aside panel">
-          <p className="eyebrow">Secure access</p>
-          <h1 className="section-title">Sign in to your workspace</h1>
-          <p className="page-copy">
-            Continue to the right workspace for your account, whether you manage projects, review submissions, or discover student work.
-          </p>
-          <div className="auth-highlights">
-            <span>Student workspace</span>
-            <span>Lecturer review area</span>
-            <span>Recruiter project discovery</span>
+      <div className="auth-shell split">
+        <div className="auth-visual">
+          <div className="visual-inner">
+            <span className="visual-tag">ProjectSphere workspace</span>
+            <h1>Welcome back!</h1>
+            <p className="visual-sub">Sign in to continue to your projects and reviews.</p>
+          </div>
+          <div className="visual-panel">
+            <div className="visual-panel-item">
+              <span>Secure login</span>
+              <strong>Access your workspace instantly</strong>
+            </div>
+            <div className="visual-panel-item small">
+              <span>Built for students and recruiters</span>
+              <strong>Keep projects and feedback organized</strong>
+            </div>
           </div>
         </div>
 
-        <div className="panel auth-card">
-          <div className="auth-card-header">
-            <p className="eyebrow">Welcome back</p>
-            <h2 className="section-title">Sign in</h2>
-            <p className="page-copy">Enter your account details to continue.</p>
+        <div className="panel auth-card split-card">
+          <div className="auth-card-top">
+            <div className="auth-brand">
+              <div className="brand-mark">PS</div>
+              <div className="brand">ProjectSphere</div>
+            </div>
+            <h2 className="section-title">Sign In</h2>
+            <p className="page-copy">Use your account to access ProjectSphere.</p>
           </div>
 
           {error && <div className="alert alert-error">{error}</div>}
@@ -109,15 +117,13 @@ function Login() {
               />
             </div>
 
-            <div className="form-field">
-              <label htmlFor="login-role">Account type</label>
-              <select id="login-role" name="role" value={form.role} onChange={updateField}>
-                <option value="student">Student</option>
-                <option value="lecturer">Lecturer</option>
-                <option value="recruiter">Recruiter</option>
-                <option value="admin">Admin</option>
-              </select>
-              <span className="field-hint">Choose the workspace you want to open.</span>
+            <div className="form-actions-row">
+              <div>
+                <label className="field-hint"><input type="checkbox" /> Remember me</label>
+              </div>
+              <div>
+                <a href="#" className="field-hint">Forgot password?</a>
+              </div>
             </div>
 
             <button className="button button-primary button-full" type="submit" disabled={isSubmitting}>
@@ -127,7 +133,13 @@ function Login() {
             <div className="divider">or</div>
 
             <button className="button button-google" type="button" onClick={handleGoogleLogin}>
-              Continue with Google
+              <svg className="google-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 533.5 544.3" width="18" height="18" aria-hidden="true">
+                <path fill="#4285F4" d="M533.5 278.4c0-18.5-1.5-36.3-4.3-53.6H272v101.5h146.9c-6.3 34-25 62.8-53.4 82v68.1h86.3c50.6-46.6 79.7-115.2 79.7-198.0z"/>
+                <path fill="#34A853" d="M272 544.3c72.3 0 133-23.9 177.3-64.8l-86.3-68.1c-24 16.1-54.8 25.6-91 25.6-69.9 0-129.2-47.1-150.4-110.5H35.1v69.4C79.9 479.9 168.7 544.3 272 544.3z"/>
+                <path fill="#FBBC05" d="M121.6 325.4c-10.9-32.8-10.9-68 0-100.8V155.2H35.1c-39.3 78.6-39.3 169.9 0 248.5l86.5-78.3z"/>
+                <path fill="#EA4335" d="M272 107.6c39.2 0 74.4 13.5 102.2 39.9l76.6-76.6C405 24.1 346.3 0 272 0 168.7 0 79.9 64.4 35.1 155.2l86.5 69.7C142.8 154.7 202.1 107.6 272 107.6z"/>
+              </svg>
+              <span>Continue with Google</span>
             </button>
           </form>
 

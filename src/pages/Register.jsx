@@ -67,26 +67,33 @@ function Register() {
 
   return (
     <section className="auth-layout">
-      <div className="auth-shell auth-shell-wide">
-        <div className="auth-aside panel">
-          <p className="eyebrow">Join ProjectSphere</p>
-          <h1 className="section-title">Create a clear professional profile</h1>
-          <p className="page-copy">
-            Add the details that help your account open the right workspace and present your profile clearly.
-          </p>
-          <div className="register-checklist">
-            <span>Full name and email</span>
-            <span>Secure password</span>
-            <span>Account type</span>
-            <span>Profile details</span>
+      <div className="auth-shell split">
+        <div className="auth-visual">
+          <div className="visual-inner">
+            <span className="visual-tag">New space</span>
+            <h1>Create an account</h1>
+            <p className="visual-sub">Join ProjectSphere to manage and showcase projects.</p>
+          </div>
+          <div className="visual-panel">
+            <div className="visual-panel-item">
+              <span>Welcome aboard</span>
+              <strong>Start building your profile</strong>
+            </div>
+            <div className="visual-panel-item small">
+              <span>ProjectSphere is your hub</span>
+              <strong>Showcase work with confidence</strong>
+            </div>
           </div>
         </div>
 
-        <div className="panel auth-card register-card">
-          <div className="auth-card-header">
-            <p className="eyebrow">Create account</p>
+        <div className="panel auth-card split-card">
+          <div className="auth-card-top">
+            <div className="auth-brand">
+              <div className="brand-mark">PS</div>
+              <div className="brand">ProjectSphere</div>
+            </div>
             <h2 className="section-title">Register</h2>
-            <p className="page-copy">Choose the account type that matches how you will use ProjectSphere.</p>
+            <p className="page-copy">Create your account and set up a profile.</p>
           </div>
 
           {error && <div className="alert alert-error">{error}</div>}
@@ -146,138 +153,6 @@ function Register() {
                 </select>
               </div>
             </div>
-
-            {form.role === 'student' && (
-              <div className="form-panel">
-                <span className="badge blue">Student profile</span>
-                <div className="form-row">
-                  <div className="form-field">
-                    <label htmlFor="student-id">Student id</label>
-                    <input
-                      id="student-id"
-                      name="studentId"
-                      type="text"
-                      placeholder="IT2026001"
-                      value={form.studentId}
-                      onChange={updateField}
-                    />
-                  </div>
-                  <div className="form-field">
-                    <label htmlFor="student-department">Department</label>
-                    <select
-                      id="student-department"
-                      name="department"
-                      value={form.department}
-                      onChange={updateDepartment}
-                    >
-                      <option value="">Select department</option>
-                      {departmentOptions.map((department) => (
-                        <option key={department} value={department}>{department}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {form.department === 'Other' && (
-                    <div className="form-field">
-                      <label htmlFor="student-custom-department">Other department</label>
-                      <input
-                        id="student-custom-department"
-                        name="customDepartment"
-                        type="text"
-                        placeholder="Type your department"
-                        value={form.customDepartment}
-                        onChange={updateField}
-                      />
-                    </div>
-                  )}
-                  <div className="form-field">
-                    <label htmlFor="academic-year">Academic year</label>
-                    <select id="academic-year" name="academicYear" value={form.academicYear} onChange={updateField}>
-                      <option value="">Select year</option>
-                      <option value="1">Year 1</option>
-                      <option value="2">Year 2</option>
-                      <option value="3">Year 3</option>
-                      <option value="4">Year 4</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {form.role === 'lecturer' && (
-              <div className="form-panel">
-                <span className="badge">Lecturer profile</span>
-                <div className="form-row">
-                  <div className="form-field">
-                    <label htmlFor="staff-id">Staff id</label>
-                    <input
-                      id="staff-id"
-                      name="staffId"
-                      type="text"
-                      placeholder="LEC1024"
-                      value={form.staffId}
-                      onChange={updateField}
-                    />
-                  </div>
-                  <div className="form-field">
-                    <label htmlFor="lecturer-department">Department</label>
-                    <select
-                      id="lecturer-department"
-                      name="department"
-                      value={form.department}
-                      onChange={updateDepartment}
-                    >
-                      <option value="">Select department</option>
-                      {departmentOptions.map((department) => (
-                        <option key={department} value={department}>{department}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {form.department === 'Other' && (
-                    <div className="form-field">
-                      <label htmlFor="lecturer-custom-department">Other department</label>
-                      <input
-                        id="lecturer-custom-department"
-                        name="customDepartment"
-                        type="text"
-                        placeholder="Type your department"
-                        value={form.customDepartment}
-                        onChange={updateField}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {form.role === 'recruiter' && (
-              <div className="form-panel">
-                <span className="badge gold">Recruiter profile</span>
-                <div className="form-row">
-                  <div className="form-field">
-                    <label htmlFor="company">Company</label>
-                    <input
-                      id="company"
-                      name="company"
-                      type="text"
-                      placeholder="Company name"
-                      value={form.company}
-                      onChange={updateField}
-                    />
-                  </div>
-                  <div className="form-field">
-                    <label htmlFor="job-title">Job title</label>
-                    <input
-                      id="job-title"
-                      name="jobTitle"
-                      type="text"
-                      placeholder="Talent Acquisition Lead"
-                      value={form.jobTitle}
-                      onChange={updateField}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
 
             <button className="button button-primary button-full" type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Creating account...' : 'Create account'}

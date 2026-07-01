@@ -20,6 +20,7 @@ import Register from './pages/Register.jsx';
 import MyProjects from './components/projects/MyProjects.jsx'
 import CreateProject from './components/projects/CreateProject.jsx'
 import EditProject from './components/projects/EditProject.jsx'
+import Approvals from './pages/lecturer/Approvals.jsx';
 
 function App() {
   return (
@@ -49,7 +50,7 @@ function App() {
                 <Route
                   path="/dashboard/student"
                   element={(
-                    <ProtectedRoute allowedRoles={['student']}>
+                    <ProtectedRoute allowedRoles={['Student']}>
                       <Dashboard role="student" />
                     </ProtectedRoute>
                   )}
@@ -57,7 +58,7 @@ function App() {
                 <Route
                   path="/dashboard/lecturer"
                   element={(
-                    <ProtectedRoute allowedRoles={['lecturer', 'admin']}>
+                    <ProtectedRoute allowedRoles={['Lecturer', 'Admin']}>
                       <Dashboard role="lecturer" />
                     </ProtectedRoute>
                   )}
@@ -65,7 +66,7 @@ function App() {
                 <Route
                   path="/dashboard/recruiter"
                   element={(
-                    <ProtectedRoute allowedRoles={['recruiter']}>
+                    <ProtectedRoute allowedRoles={['Recruiter']}>
                       <Dashboard role="recruiter" />
                     </ProtectedRoute>
                   )}
@@ -74,7 +75,7 @@ function App() {
                 <Route
                   path="/student/projects"
                   element={(
-                    <ProtectedRoute allowedRoles={["student"]}>
+                    <ProtectedRoute allowedRoles={["Student"]}>
                       <MyProjects />
                     </ProtectedRoute>
                   )}
@@ -82,7 +83,7 @@ function App() {
                 <Route
                   path="/student/projects/create"
                   element={(
-                    <ProtectedRoute allowedRoles={["student"]}>
+                    <ProtectedRoute allowedRoles={["Student"]}>
                       <CreateProject />
                     </ProtectedRoute>
                   )}
@@ -90,7 +91,7 @@ function App() {
                 <Route
                   path="/projects/:id/edit"
                   element={(
-                    <ProtectedRoute allowedRoles={["student"]}>
+                    <ProtectedRoute allowedRoles={["Student"]}>
                       <EditProject />
                     </ProtectedRoute>
                   )}
@@ -98,15 +99,15 @@ function App() {
                 <Route
                   path="/lecturer/approvals"
                   element={(
-                    <ProtectedRoute allowedRoles={['lecturer', 'admin']}>
-                      <PlaceholderPage title="Pending approvals" role="Lecturer" />
+                    <ProtectedRoute allowedRoles={['Lecturer', 'Admin']}>
+                      <Approvals />
                     </ProtectedRoute>
                   )}
                 />
                 <Route
                   path="/recruiter/saved"
                   element={(
-                    <ProtectedRoute allowedRoles={['recruiter']}>
+                    <ProtectedRoute allowedRoles={['Recruiter']}>
                       <SavedProjects />
                     </ProtectedRoute>
                   )}
@@ -114,7 +115,7 @@ function App() {
                 <Route
                   path="/recruiter/followed"
                   element={(
-                    <ProtectedRoute allowedRoles={['recruiter']}>
+                    <ProtectedRoute allowedRoles={['Recruiter']}>
                       <FollowedStudents />
                     </ProtectedRoute>
                   )}

@@ -71,19 +71,32 @@ const toFormData = (project) => {
   return formData;
 };
 
+const normalizeProject = (project) => ({
+  ...project,
+  id: project._id || project.id,
+  thumbnailUrl: project.thumbnail || project.thumbnailUrl || '',
+  student: project.owner ? {
+    id: project.owner._id || project.owner.id,
+    name: project.owner.name,
+    email: project.owner.email,
+    profilePicture: project.owner.profilePicture,
+  } : project.student,
+  owner: project.owner,
+});
+
 export async function getMyProjects(token, user) {
   if (USE_BACKEND) {
     const { data } = await api.get('/projects/my-projects');
-    return data.projects || [];
+    return (data.projects || []).map(normalizeProject);
   }
 
-  return readProjects().filter((project) => project.ownerId === (user?.id || 'demo-student'));
+  return readProjects().filter((project) => project.ownerId === (user?._id || user?.id || 'demo-student'));
 }
 
 export async function getProjectById(id, token) {
   if (USE_BACKEND) {
     const { data } = await api.get(`/projects/${id}`);
-    return data.project || null;
+    return data.project ? normalizeProject(data.project) : null;
   }
 
   return readProjects().find((project) => String(project.id) === String(id)) || null;
@@ -94,7 +107,7 @@ export async function createProject(project, token, user) {
     const { data } = await api.post('/projects', toFormData(project), {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    return data.project || data;
+    return data.project ? normalizeProject(data.project) : data;
   }
 
   const projects = readProjects();
@@ -116,7 +129,7 @@ export async function updateProject(id, project, token) {
     const { data } = await api.put(`/projects/${id}`, toFormData(project), {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    return data.project || data;
+    return data.project ? normalizeProject(data.project) : data;
   }
 
   const projects = readProjects();
@@ -153,13 +166,13 @@ export async function getAllProjects(filters = {}) {
   if (USE_BACKEND) {
     const queryParams = new URLSearchParams(filters).toString();
     const { data } = await api.get(`/projects${queryParams ? `?${queryParams}` : ''}`);
-    return data.projects || [];
+    return (data.projects || []).map(normalizeProject);
   }
 
   return readProjects();
 }
 
-// Like/Unlike a project (Recruiter only)
+// Like/Unlike a project (Student, Lecturer, Recruiter)
 export async function likeProject(projectId) {
   if (USE_BACKEND) {
     const { data } = await api.post(`/projects/${projectId}/like`);
@@ -167,4 +180,52 @@ export async function likeProject(projectId) {
   }
 
   return { success: true, message: 'Feature not available in offline mode' };
+}
+
+// Add a comment to a project (Student, Lecturer, Recruiter)
+export async function commentProject(projectId, text) {
+  if (USE_BACKEND) {
+    const { data } = await api.post(`/projects/${projectId}/comment`, { text });
+    return data;
+  }
+
+  return { success: true, message: 'Feature not available in offline mode' };
+}
+
+// Lecturer specific API calls
+export async function getLecturerDashboard() {
+  if (USE_BACKEND) {
+    const { data } = await api.get('/admin/dashboard');
+    return data;
+  }
+
+  return {
+    success: true,
+    stats: { projects: { pending: 0, approved: 0, rejected: 0, total: 0 } },
+    recentProjects: [],
+  };
+}
+
+export async function getPendingProjects() {
+  if (USE_BACKEND) {
+    const { data } = await api.get('/admin/projects/pending');
+    return (data.projects || []).map(normalizeProject);
+  }
+  return [];
+}
+
+export async function approveProject(projectId) {
+  if (USE_BACKEND) {
+    const { data } = await api.put(`/admin/projects/${projectId}/approve`);
+    return data;
+  }
+  return { success: true };
+}
+
+export async function rejectProject(projectId) {
+  if (USE_BACKEND) {
+    const { data } = await api.put(`/admin/projects/${projectId}/reject`);
+    return data;
+  }
+  return { success: true };
 }

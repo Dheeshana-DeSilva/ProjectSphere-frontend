@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAlert } from '../hooks/useAlert.js';
 import { useAuth } from '../hooks/useAuth.js';
@@ -16,16 +16,18 @@ function Login() {
   const { dashboardPaths, login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const errorShownRef = useRef(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const errorParam = params.get('error');
-    if (errorParam) {
-      setError(errorParam);
+    if (errorParam && !errorShownRef.current) {
+      errorShownRef.current = true;
+      showAlert({ type: 'error', title: 'Authentication failed', message: errorParam });
       // Remove error from URL to prevent it from showing on refresh
       navigate('/login', { replace: true });
     }
-  }, [location, navigate]);
+  }, [location.search, navigate, showAlert]);
 
   const redirectAfterAuth = (role) => {
     const fallback = '/';

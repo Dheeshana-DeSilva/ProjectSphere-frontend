@@ -4,9 +4,11 @@ import { Bookmark, Loader2 } from 'lucide-react';
 import LikeButton from '../../components/recruiter/LikeButton';
 import SaveButton from '../../components/recruiter/SaveButton';
 import { getAllProjects } from '../../services/projectService';
+import { normalizeProjectLikes } from '../../utils/projectLikes.js';
 
 // ─── Normalise backend project shape ──────────────────────────────────────────
 function normaliseProject(p) {
+  const likeMeta = normalizeProjectLikes(p);
   return {
     ...p,
     id: p._id || p.id,
@@ -14,7 +16,7 @@ function normaliseProject(p) {
       ? { id: p.owner._id || p.owner, name: p.owner.name || 'Student', email: p.owner.email || '' }
       : p.student || { id: '', name: 'Unknown', email: '' },
     technologies: Array.isArray(p.technologies) ? p.technologies : [],
-    likes: typeof p.likes === 'number' ? p.likes : Array.isArray(p.likes) ? p.likes.length : 0,
+    ...likeMeta,
     description: p.description || '',
   };
 }
@@ -94,7 +96,12 @@ export default function SavedProjects() {
                     </span>
                     <div className="flex items-center gap-2">
                       <SaveButton projectId={project.id} compact />
-                      <LikeButton projectId={project.id} initialLikes={project.likes} />
+                      <LikeButton
+                        projectId={project.id}
+                        likes={project.likesArray}
+                        likedByCurrentUser={project.likedByCurrentUser}
+                        initialLikes={project.likes}
+                      />
                     </div>
                   </div>
                   

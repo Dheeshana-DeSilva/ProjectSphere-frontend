@@ -196,6 +196,47 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const changePassword = async (passwordData) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await authService.changePassword(passwordData);
+      return response;
+    } catch (err) {
+      const errorMsg = typeof err === 'string' ? err : (err.response?.data?.error || err.message || 'Password change failed');
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProfilePicture = async (imageFile) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await authService.updateProfilePicture(imageFile);
+
+      if (response.success && response.user) {
+        const updatedAuth = {
+          ...auth,
+          user: response.user,
+        };
+        setAuth(updatedAuth);
+        saveAuth(updatedAuth);
+        return response;
+      }
+    } catch (err) {
+      const errorMsg = typeof err === 'string' ? err : (err.response?.data?.error || err.message || 'Profile picture update failed');
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       if (auth?.token && !auth.token.startsWith('session-token-')) {
@@ -223,6 +264,8 @@ export function AuthProvider({ children }) {
     resendOTP,
     loginWithGoogle,
     updateUserProfile,
+    changePassword,
+    updateProfilePicture,
     logout,
     clearError: () => setError(null),
   }), [auth, loading, error]);

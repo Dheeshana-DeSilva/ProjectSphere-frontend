@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
+import { getMyProjects } from '../services/projectService.js';
+import { useState, useEffect } from 'react';
+import DashboardSidebarProfile from '../components/dashboard/DashboardSidebarProfile.jsx';
+import StudentRecentProjects from '../components/dashboard/StudentRecentProjects.jsx';
+import LecturerOverview from '../components/dashboard/LecturerOverview.jsx';
+import RecruiterOverview from '../components/dashboard/RecruiterOverview.jsx';
+import { formatAuthProviders, formatMemberSince, getRoleAccess } from '../utils/roleAccess.js';
 
 const dashboardContent = {
   student: {
     eyebrow: 'Student dashboard',
     title: 'Manage your project journey',
     copy: 'Create project submissions, track approval status, and prepare your public profile for recruiter discovery.',
-    stats: [
-      { label: 'My projects', value: '03' },
-      { label: 'Pending review', value: '01' },
-      { label: 'Profile views', value: '28' },
-    ],
     nav: [
       { label: 'Dashboard', to: '/dashboard/student' },
       { label: 'My projects', to: '/student/projects' },
@@ -21,36 +22,25 @@ const dashboardContent = {
       { label: 'Create project', to: '/student/projects/create', variant: 'button-primary' },
       { label: 'My projects', to: '/student/projects', variant: 'button-secondary' },
     ],
-    tasks: ['Complete project thumbnail', 'Add GitHub repository link', 'Review lecturer feedback'],
   },
   lecturer: {
     eyebrow: 'Lecturer dashboard',
     title: 'Review submissions with clarity',
     copy: 'Approve high-quality work, reject incomplete submissions, and help students improve before projects become public.',
-    stats: [
-      { label: 'Pending projects', value: '16' },
-      { label: 'Approved this week', value: '08' },
-      { label: 'Rejected drafts', value: '03' },
-    ],
     nav: [
       { label: 'Dashboard', to: '/dashboard/lecturer' },
       { label: 'Approvals', to: '/lecturer/approvals' },
+      { label: 'Browse projects', to: '/projects' },
     ],
     actions: [
       { label: 'Open approvals', to: '/lecturer/approvals', variant: 'button-primary' },
       { label: 'Browse projects', to: '/projects', variant: 'button-secondary' },
     ],
-    tasks: ['Review new AI submissions', 'Check rejected project resubmissions', 'Confirm project category tags'],
   },
   recruiter: {
     eyebrow: 'Recruiter dashboard',
     title: 'Discover approved student talent',
     copy: 'Browse public projects, save interesting work, and follow students whose skills match your hiring needs.',
-    stats: [
-      { label: 'Saved projects', value: '12' },
-      { label: 'Followed students', value: '07' },
-      { label: 'New projects', value: '21' },
-    ],
     nav: [
       { label: 'Dashboard', to: '/dashboard/recruiter' },
       { label: 'Saved projects', to: '/recruiter/saved' },
@@ -59,55 +49,121 @@ const dashboardContent = {
     actions: [
       { label: 'Explore projects', to: '/projects', variant: 'button-primary' },
     ],
-    tasks: ['Shortlist web app projects', 'Follow top data science students', 'Review new approved submissions'],
   },
 };
 
-function Dashboard({ role }) {
-  const { roleLabels, user } = useAuth();
-  const content = dashboardContent[role] || dashboardContent.student;
+function StudentStats() {
+  const { token, user } = useAuth();
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [tasks, setTasks] = useState(() => 
-    content.tasks.map((t, i) => ({ id: Date.now() + i, text: t, done: false }))
-  );
-  const [newTask, setNewTask] = useState('');
-
-  // Reset tasks if role changes
   useEffect(() => {
-    setTasks(content.tasks.map((t, i) => ({ id: Date.now() + i, text: t, done: false })));
-  }, [role, content.tasks]);
+    let active = true;
+    getMyProjects(token, user)
+      .then(projects => {
+        if (!active) return;
+        setStats({
+          total: projects.length,
+          pending: projects.filter(p => (p.status || 'Pending') === 'Pending').length,
+          approved: projects.filter(p => p.status === 'Approved').length,
+        });
+      })
+      .catch(() => {
+        if (active) setStats({ total: 0, pending: 0, approved: 0 });
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [token, user]);
 
-  const toggleTask = (id) => {
-    // Mark as done immediately for UI feedback
-    setTasks(prev => prev.map(t => t.id === id ? { ...t, done: true } : t));
-    
-    // Remove it after a short delay
-    setTimeout(() => {
-      setTasks(prev => prev.filter(t => t.id !== id));
-    }, 300);
-  };
+  if (loading) {
+    return (
+      <div className="stat-grid">
+        {[1, 2, 3].map(i => (
+          <article className="panel stat-card" key={i}>
+            <strong className="animate-pulse text-slate-300">—</strong>
+            <span className="text-slate-400 text-xs">Loading…</span>
+          </article>
+        ))}
+      </div>
+    );
+  }
 
-  const addTask = (e) => {
-    e.preventDefault();
-    if (!newTask.trim()) return;
-    setTasks(prev => [...prev, { id: Date.now(), text: newTask.trim(), done: false }]);
-    setNewTask('');
-  };
+  return (
+    <div className="stat-grid">
+      <article className="panel stat-card">
+        <strong>{stats.total}</strong>
+        <span>My projects</span>
+      </article>
+      <article className="panel stat-card">
+        <strong>{stats.pending}</strong>
+        <span>Pending review</span>
+      </article>
+      <article className="panel stat-card">
+        <strong>{stats.approved}</strong>
+        <span>Approved</span>
+      </article>
+    </div>
+  );
+}
+
+function DashboardAccessSummary() {
+  const { user, roleLabels } = useAuth();
+  const access = getRoleAccess(user.role);
+
+  return (
+    <div className="panel dashboard-content-panel">
+      <div className="content-panel-header">
+        <p className="eyebrow">Platform access</p>
+        <h2>Your permissions</h2>
+      </div>
+
+      <div className="access-summary-grid">
+        <section className="access-summary-card access-summary-readonly" aria-labelledby="readonly-access-heading">
+          <div className="access-summary-card-header">
+            <span className="access-type-badge access-type-readonly">Read-only</span>
+            <h3 id="readonly-access-heading">Account credentials</h3>
+            <p className="access-summary-desc">These details are fixed and cannot be edited here.</p>
+          </div>
+          <dl className="credentials-list credentials-list-panel">
+            {access.readOnly.map((item) => (
+              <div className="credentials-row" key={item.value}>
+                <dt>{item.label}</dt>
+                <dd>
+                  {item.value === 'email' && user.email}
+                  {item.value === 'role' && (roleLabels[user.role] || user.role)}
+                  {item.value === 'authProviders' && formatAuthProviders(user.authProviders)}
+                  {item.value === 'createdAt' && formatMemberSince(user.createdAt)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section className="access-summary-card access-summary-write" aria-labelledby="write-access-heading">
+          <div className="access-summary-card-header">
+            <span className="access-type-badge access-type-write">Write access</span>
+            <h3 id="write-access-heading">What you can do</h3>
+            <p className="access-summary-desc">Actions available with your current role.</p>
+          </div>
+          <ul className="access-list access-list-panel">
+            {access.writeAccess.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({ role }) {
+  const content = dashboardContent[role] || dashboardContent.student;
 
   return (
     <section className="dashboard-page">
       <div className="container dashboard-shell">
         <aside className="panel dashboard-sidebar">
-          <div>
-            <span className="badge blue">{roleLabels[user.role] || user.role}</span>
-            <h2>{user.name}</h2>
-            <p>{user.email}</p>
-          </div>
-          <nav className="dashboard-menu" aria-label="Dashboard navigation">
-            {content.nav.map((link) => (
-              <Link key={link.to} to={link.to}>{link.label}</Link>
-            ))}
-          </nav>
+          <DashboardSidebarProfile navLinks={content.nav} />
         </aside>
 
         <div className="dashboard-main">
@@ -124,49 +180,29 @@ function Dashboard({ role }) {
             </div>
           </div>
 
-          <div className="stat-grid">
-            {content.stats.map((stat) => (
-              <article className="panel stat-card" key={stat.label}>
-                <strong>{stat.value}</strong>
-                <span>{stat.label}</span>
-              </article>
-            ))}
-          </div>
+          {role === 'student' && (
+            <>
+              <StudentStats />
+              <div className="dashboard-content-grid">
+                <StudentRecentProjects />
+                <DashboardAccessSummary />
+              </div>
+            </>
+          )}
 
-          <div className="panel task-panel">
-            <div className="task-panel-header">
-              <p className="eyebrow">Priority work</p>
-              <h2>Next actions</h2>
-            </div>
-            <div className="task-list">
-              {tasks.length === 0 ? (
-                <p className="text-slate-400 text-sm italic">All tasks completed!</p>
-              ) : (
-                tasks.map((task) => (
-                  <label className={`task-item transition-all duration-300 ${task.done ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`} key={task.id}>
-                    <input
-                      type="checkbox"
-                      checked={task.done}
-                      onChange={() => toggleTask(task.id)}
-                    />
-                    <span className={task.done ? 'line-through text-slate-400' : ''}>{task.text}</span>
-                  </label>
-                ))
-              )}
-              <form onSubmit={addTask} className="mt-4 flex gap-2">
-                <input
-                  type="text"
-                  value={newTask}
-                  onChange={e => setNewTask(e.target.value)}
-                  placeholder="Add a new task..."
-                  className="flex-grow text-sm px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-                <button type="submit" disabled={!newTask.trim()} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-sm font-semibold disabled:opacity-50">
-                  Add
-                </button>
-              </form>
-            </div>
-          </div>
+          {role === 'lecturer' && (
+            <>
+              <LecturerOverview />
+              <DashboardAccessSummary />
+            </>
+          )}
+
+          {role === 'recruiter' && (
+            <>
+              <RecruiterOverview />
+              <DashboardAccessSummary />
+            </>
+          )}
         </div>
       </div>
     </section>

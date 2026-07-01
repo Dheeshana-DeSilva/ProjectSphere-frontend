@@ -3,20 +3,22 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.js';
 
 const roleNavigation = {
-  student: [
+  Student: [
     { label: 'Dashboard', to: '/dashboard/student' },
     { label: 'My projects', to: '/student/projects' },
     { label: 'Create project', to: '/student/projects/create' },
   ],
-  lecturer: [
+  Lecturer: [
     { label: 'Dashboard', to: '/dashboard/lecturer' },
     { label: 'Approvals', to: '/lecturer/approvals' },
+    { label: 'Projects', to: '/projects' },
   ],
-  admin: [
+  Admin: [
     { label: 'Dashboard', to: '/dashboard/lecturer' },
     { label: 'Approvals', to: '/lecturer/approvals' },
+    { label: 'Projects', to: '/projects' },
   ],
-  recruiter: [
+  Recruiter: [
     { label: 'Dashboard', to: '/dashboard/recruiter' },
     { label: 'Saved', to: '/recruiter/saved' },
   ],
@@ -56,8 +58,31 @@ function Navbar() {
 
   const close = () => setMenuOpen(false);
 
+  const getRoleThemeColor = (role) => {
+    switch (role) {
+      case 'Student': return 'bg-blue-500';
+      case 'Lecturer': return 'bg-emerald-500';
+      case 'Admin': return 'bg-amber-500';
+      case 'Recruiter': return 'bg-indigo-500';
+      default: return 'bg-slate-400';
+    }
+  };
+
+  const getRoleChipClass = (role) => {
+    switch (role) {
+      case 'Student': return 'bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold border border-blue-200';
+      case 'Lecturer': return 'bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200';
+      case 'Admin': return 'bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200';
+      case 'Recruiter': return 'bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold border border-indigo-200';
+      default: return 'role-chip';
+    }
+  };
+
   return (
     <header className="site-header">
+      {isAuthenticated && (
+        <div className={`h-1 w-full ${getRoleThemeColor(user.role)} transition-colors duration-300`} />
+      )}
       <nav className="container navbar" aria-label="Main navigation">
         {/* Brand */}
         <NavLink className="brand" to="/" onClick={close}>
@@ -78,7 +103,7 @@ function Navbar() {
 
           {isAuthenticated ? (
             <div className="nav-account">
-              <span className="role-chip">{roleLabels[user.role] || user.role}</span>
+              <span className={getRoleChipClass(user.role)}>{roleLabels[user.role] || user.role}</span>
               <button className="button button-secondary nav-button" type="button" onClick={handleLogout}>
                 Logout
               </button>
@@ -116,7 +141,7 @@ function Navbar() {
 
           {isAuthenticated ? (
             <div className="nav-mobile-account">
-              <span className="role-chip">{roleLabels[user.role] || user.role}</span>
+              <span className={getRoleChipClass(user.role)}>{roleLabels[user.role] || user.role}</span>
               <button className="button button-secondary nav-button" type="button" onClick={handleLogout}>
                 Logout
               </button>

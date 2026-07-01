@@ -5,6 +5,8 @@ import SearchBar from '../../components/recruiter/SearchBar';
 import FilterPanel from '../../components/recruiter/FilterPanel';
 import LikeButton from '../../components/recruiter/LikeButton';
 import { getAllProjects } from '../../services/projectService';
+import { normalizeProjectLikes } from '../../utils/projectLikes.js';
+import { useAuth } from '../../hooks/useAuth.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const CARD_GRADIENTS = [
@@ -38,6 +40,7 @@ const SORT_OPTIONS = [
 
 // ─── Normalise backend project shape ──────────────────────────────────────────
 function normaliseProject(p) {
+  const likeMeta = normalizeProjectLikes(p);
   return {
     ...p,
     id: p._id || p.id,
@@ -45,7 +48,7 @@ function normaliseProject(p) {
       ? { id: p.owner._id || p.owner, name: p.owner.name || 'Student', email: p.owner.email || '' }
       : p.student || { id: '', name: 'Unknown', email: '' },
     technologies: Array.isArray(p.technologies) ? p.technologies : [],
-    likes: typeof p.likes === 'number' ? p.likes : Array.isArray(p.likes) ? p.likes.length : 0,
+    ...likeMeta,
     year: p.year || (p.createdAt ? new Date(p.createdAt).getFullYear() : new Date().getFullYear()),
     category: p.category || 'General',
     description: p.description || '',
@@ -129,7 +132,12 @@ function ProjectCard({ project, index }) {
           </Link>
 
           {/* Likes */}
-          <LikeButton projectId={project.id} initialLikes={project.likes} />
+          <LikeButton
+            projectId={project.id}
+            likes={project.likesArray}
+            likedByCurrentUser={project.likedByCurrentUser}
+            initialLikes={project.likes}
+          />
         </div>
 
         {/* View Details button */}
@@ -146,6 +154,7 @@ function ProjectCard({ project, index }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function Projects() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({ technology: '', category: '', year: '' });
   const [sortBy, setSortBy] = useState('likes');
@@ -178,7 +187,7 @@ export default function Projects() {
       });
 
     return () => { cancelled = true; };
-  }, []);
+  }, [user?._id, user?.id]);
 
   // Filter
   const filtered = projects.filter(p => {

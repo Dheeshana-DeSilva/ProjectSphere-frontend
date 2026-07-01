@@ -18,7 +18,7 @@ export const updateProfilePicture = async (imageFile) => {
   const formData = new FormData();
   formData.append('image', imageFile);
 
-  const response = await api.patch('/users/profile-picture', formData, {
+  const response = await api.patch('/auth/profile-picture', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

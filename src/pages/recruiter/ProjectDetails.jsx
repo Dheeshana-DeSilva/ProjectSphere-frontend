@@ -22,11 +22,14 @@ const LinkedinIcon = ({ className }) => (
 import LikeButton from '../../components/recruiter/LikeButton';
 import FollowButton from '../../components/recruiter/FollowButton';
 import SaveButton from '../../components/recruiter/SaveButton';
-import { getProjectById } from '../../services/projectService';
+import { getProjectById, commentProject } from '../../services/projectService';
+import { useAuth } from '../../hooks/useAuth';
+import { normalizeProjectLikes } from '../../utils/projectLikes.js';
 
 // ─── Normalise backend project shape ──────────────────────────────────────────
 function normaliseProject(p) {
   if (!p) return null;
+  const likeMeta = normalizeProjectLikes(p);
   return {
     ...p,
     id: p._id || p.id,
@@ -42,7 +45,7 @@ function normaliseProject(p) {
         }
       : p.student || { id: '', name: 'Unknown', email: '' },
     technologies: Array.isArray(p.technologies) ? p.technologies : [],
-    likes: typeof p.likes === 'number' ? p.likes : Array.isArray(p.likes) ? p.likes.length : 0,
+    ...likeMeta,
     year: p.year || (p.createdAt ? new Date(p.createdAt).getFullYear() : new Date().getFullYear()),
     category: p.category || 'General',
     description: p.description || '',
@@ -137,32 +140,41 @@ function SchemaTable({ table, columns }) {
 }
 
 // ─── Comments section ─────────────────────────────────────────────────────────
-function CommentsSection({ projectId, initialComments }) {
+function CommentsSection({ projectId, initialComments, user }) {
   const [comments, setComments] = useState(initialComments);
   const [text, setText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [commentLikes, setCommentLikes] = useState({});
+
+  useEffect(() => {
+    setComments(initialComments);
+  }, [initialComments]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
     setSubmitting(true);
 
-    // TODO: POST /api/projects/:projectId/comments
-    await new Promise(r => setTimeout(r, 500));
-
-    const newComment = {
-      id: `c${Date.now()}`,
-      author: 'You (Recruiter)',
-      role: 'Recruiter',
-      avatar: 'R',
-      text: text.trim(),
-      timestamp: 'Just now',
-      likes: 0,
-    };
-    setComments(prev => [newComment, ...prev]);
-    setText('');
-    setSubmitting(false);
+    try {
+      const response = await commentProject(projectId, text.trim());
+      if (response && response.success) {
+        const normalisedComments = response.comments.map(c => ({
+          id: c._id || c.id,
+          author: c.user?.name || 'Anonymous',
+          role: c.user?.role || 'User',
+          avatar: (c.user?.name || 'A').charAt(0),
+          text: c.text || '',
+          timestamp: c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'Just now',
+          likes: c.likes || 0,
+        }));
+        setComments(normalisedComments);
+        setText('');
+      }
+    } catch (error) {
+      console.error('Failed to post comment:', error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const toggleCommentLike = (id) => {
@@ -251,6 +263,7 @@ function CommentsSection({ projectId, initialComments }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ProjectDetails() {
   const { id } = useParams();
+  const { user } = useAuth();
 
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -464,7 +477,7 @@ export default function ProjectDetails() {
             )}
 
             {/* Comments */}
-            <CommentsSection projectId={project.id} initialComments={project.comments ?? []} />
+            <CommentsSection projectId={project.id} initialComments={project.comments ?? []} user={user} />
           </div>
 
           {/* ── Right column (student card + like) ── */}
@@ -526,8 +539,13 @@ export default function ProjectDetails() {
             {/* Action card */}
             <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-4">
               <div className="flex flex-col items-center gap-2 pb-4 border-b border-slate-100">
-                <p className="text-slate-500 text-sm">Did you like this project?</p>
-                <LikeButton projectId={project.id} initialLikes={project.likes} large />
+                <LikeButton
+                  projectId={project.id}
+                  likes={project.likesArray}
+                  likedByCurrentUser={project.likedByCurrentUser}
+                  initialLikes={project.likes}
+                  large
+                />
               </div>
               <div className="flex flex-col items-center gap-2 pt-1">
                 <p className="text-slate-500 text-sm text-center">Save this project to review later</p>

@@ -41,7 +41,12 @@ function MyProjects() {
         const data = await getMyProjects(token, user);
         if (active) setProjects(data);
       } catch (err) {
-        if (active) setError(err.response?.data?.message || err.message || 'Could not load projects.');
+        if (active) {
+          const message = typeof err === 'string'
+            ? err
+            : (err.response?.data?.error || err.response?.data?.message || err.message);
+          setError(message || 'Could not load projects.');
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -106,7 +111,7 @@ function MyProjects() {
 
         {loading ? (
           <div className="panel placeholder-panel">Loading your projects...</div>
-        ) : projects.length === 0 ? (
+        ) : error ? null : projects.length === 0 ? (
           <div className="panel project-empty-state">
             <h2>No projects yet</h2>
             <p>Create your first project submission and send it for lecturer review.</p>

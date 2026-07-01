@@ -67,6 +67,27 @@ export const updateProfile = async (profileData) => {
   return response.data;
 };
 
+// Change password
+export const changePassword = async ({ currentPassword, newPassword, confirmPassword }) => {
+  const response = await api.put('/auth/password', {
+    currentPassword,
+    newPassword,
+    confirmPassword,
+  });
+  return response.data;
+};
+
+// Upload profile picture
+export const updateProfilePicture = async (imageFile) => {
+  const formData = new FormData();
+  formData.append('image', imageFile);
+
+  const response = await api.patch('/auth/profile-picture', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};
+
 // Logout
 export const logout = async () => {
   const response = await api.post('/auth/logout');
@@ -76,7 +97,8 @@ export const logout = async () => {
 // Google OAuth - Redirect to backend Google auth
 export const loginWithGoogle = () => {
   const googleAuthUrl = import.meta.env.VITE_GOOGLE_AUTH_URL || 'http://localhost:5000/api/auth/google';
-  window.location.href = googleAuthUrl;
+  const currentOrigin = window.location.origin;
+  window.location.href = `${googleAuthUrl}?origin=${encodeURIComponent(currentOrigin)}`;
 };
 
 // Handle Google OAuth callback (called after redirect)

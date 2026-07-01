@@ -1,6 +1,37 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getPublicStats } from '../services/statsService.js';
 
 function Home() {
+  const [stats, setStats] = useState({ projects: null, pending: null, recruiters: null });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    getPublicStats()
+      .then((data) => {
+        if (active && data?.stats) {
+          setStats(data.stats);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setStats({ projects: 0, pending: 0, recruiters: 0 });
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => { active = false; };
+  }, []);
+
+  const displayStat = (value) => {
+    if (loading) return '—';
+    return value ?? 0;
+  };
+
   return (
     <section className="page-section">
       <div className="container">
@@ -33,15 +64,15 @@ function Home() {
                 </div>
                 <div className="preview-grid">
                   <div className="preview-stat">
-                    <strong>48</strong>
+                    <strong>{displayStat(stats.projects)}</strong>
                     <span>Projects</span>
                   </div>
                   <div className="preview-stat">
-                    <strong>16</strong>
+                    <strong>{displayStat(stats.pending)}</strong>
                     <span>Pending</span>
                   </div>
                   <div className="preview-stat">
-                    <strong>24</strong>
+                    <strong>{displayStat(stats.recruiters)}</strong>
                     <span>Recruiters</span>
                   </div>
                 </div>

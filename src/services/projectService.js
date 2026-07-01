@@ -214,6 +214,14 @@ export async function getPendingProjects() {
   return [];
 }
 
+export async function getApprovedProjects() {
+  if (USE_BACKEND) {
+    const { data } = await api.get('/admin/projects/approved');
+    return (data.projects || []).map(normalizeProject);
+  }
+  return [];
+}
+
 export async function approveProject(projectId) {
   if (USE_BACKEND) {
     const { data } = await api.put(`/admin/projects/${projectId}/approve`);

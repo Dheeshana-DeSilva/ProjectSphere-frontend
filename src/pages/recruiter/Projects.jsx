@@ -44,6 +44,7 @@ function normaliseProject(p) {
   return {
     ...p,
     id: p._id || p.id,
+    thumbnailUrl: p.thumbnail || p.thumbnailUrl || '',
     student: p.owner
       ? { id: p.owner._id || p.owner, name: p.owner.name || 'Student', email: p.owner.email || '' }
       : p.student || { id: '', name: 'Unknown', email: '' },
@@ -61,16 +62,31 @@ function normaliseProject(p) {
 function ProjectCard({ project, index }) {
   const gradient = CARD_GRADIENTS[index % CARD_GRADIENTS.length];
   const icon = CATEGORY_ICONS[project.category] ?? <Folder className="w-3.5 h-3.5" />;
+  const hasThumbnail = project.thumbnailUrl || project.thumbnail;
 
   return (
     <article className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 hover:border-violet-200 transition-all duration-300 hover:-translate-y-1">
 
       {/* ── Thumbnail banner ── */}
-      <div className={`relative h-40 bg-gradient-to-br ${gradient} flex items-center justify-center overflow-hidden`}>
-        {/* Large watermark letter */}
-        <span className="text-white/20 text-9xl font-black select-none leading-none">
-          {project.title.charAt(0)}
-        </span>
+      <div className={`relative h-40 ${hasThumbnail ? 'bg-slate-100' : `bg-gradient-to-br ${gradient}`} flex items-center justify-center overflow-hidden`}>
+        {/* Show actual thumbnail if available */}
+        {hasThumbnail ? (
+          <img 
+            src={project.thumbnailUrl || project.thumbnail} 
+            alt={`${project.title} thumbnail`}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to gradient if image fails to load
+              e.target.style.display = 'none';
+              e.target.parentElement.classList.add(`bg-gradient-to-br`, gradient.split(' ')[0], gradient.split(' ')[1]);
+            }}
+          />
+        ) : (
+          /* Large watermark letter as fallback */
+          <span className="text-white/20 text-9xl font-black select-none leading-none">
+            {project.title.charAt(0)}
+          </span>
+        )}
 
         {/* Category badge */}
         <span className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/30 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">

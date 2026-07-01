@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Bot, Globe, Smartphone, Plug, HeartPulse, Link as LinkIcon, BarChart3, ShieldCheck, Folder, Settings2 } from 'lucide-react';
+import { Bot, Globe, Smartphone, Plug, HeartPulse, Link as LinkIcon, BarChart3, ShieldCheck, Folder, Settings2, Loader2 } from 'lucide-react';
 import SearchBar from '../../components/recruiter/SearchBar';
 import FilterPanel from '../../components/recruiter/FilterPanel';
 import LikeButton from '../../components/recruiter/LikeButton';
-
-import { MOCK_PROJECTS_LIST as MOCK_PROJECTS } from '../../data/mockProjects';
+import { getAllProjects } from '../../services/projectService';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const CARD_GRADIENTS = [
@@ -36,6 +35,24 @@ const SORT_OPTIONS = [
   { value: 'oldest', label: 'Oldest First' },
   { value: 'title', label: 'A → Z' },
 ];
+
+// ─── Normalise backend project shape ──────────────────────────────────────────
+function normaliseProject(p) {
+  return {
+    ...p,
+    id: p._id || p.id,
+    student: p.owner
+      ? { id: p.owner._id || p.owner, name: p.owner.name || 'Student', email: p.owner.email || '' }
+      : p.student || { id: '', name: 'Unknown', email: '' },
+    technologies: Array.isArray(p.technologies) ? p.technologies : [],
+    likes: typeof p.likes === 'number' ? p.likes : Array.isArray(p.likes) ? p.likes.length : 0,
+    year: p.year || (p.createdAt ? new Date(p.createdAt).getFullYear() : new Date().getFullYear()),
+    category: p.category || 'General',
+    description: p.description || '',
+    githubLink: p.githubUrl || p.githubLink || null,
+    liveDemo: p.liveDemo || null,
+  };
+}
 
 // ─── Project Card ─────────────────────────────────────────────────────────────
 function ProjectCard({ project, index }) {
@@ -134,8 +151,37 @@ export default function Projects() {
   const [sortBy, setSortBy] = useState('likes');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  // ── Fetch projects from API ──
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    getAllProjects()
+      .then(data => {
+        if (!cancelled) {
+          setProjects((data || []).map(normaliseProject));
+        }
+      })
+      .catch(err => {
+        if (!cancelled) {
+          console.error('Failed to fetch projects:', err);
+          setError('Failed to load projects. Please try again later.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, []);
+
   // Filter
-  const filtered = MOCK_PROJECTS.filter(p => {
+  const filtered = projects.filter(p => {
     const q = searchQuery.toLowerCase();
     const matchSearch =
       !q ||
@@ -188,11 +234,11 @@ export default function Projects() {
 
           {/* Stats strip */}
           <div className="flex items-center justify-center gap-8 mt-8 text-sm text-indigo-200">
-            <span><strong className="text-white text-lg font-bold">{MOCK_PROJECTS.length}</strong> Projects</span>
+            <span><strong className="text-white text-lg font-bold">{projects.length}</strong> Projects</span>
             <span className="w-px h-5 bg-white/20" />
-            <span><strong className="text-white text-lg font-bold">8</strong> Students</span>
+            <span><strong className="text-white text-lg font-bold">{new Set(projects.map(p => p.student.id)).size}</strong> Students</span>
             <span className="w-px h-5 bg-white/20" />
-            <span><strong className="text-white text-lg font-bold">6</strong> Categories</span>
+            <span><strong className="text-white text-lg font-bold">{new Set(projects.map(p => p.category)).size}</strong> Categories</span>
           </div>
         </div>
       </div>
@@ -229,7 +275,7 @@ export default function Projects() {
                 Showing{' '}
                 <span className="font-semibold text-slate-800">{sorted.length}</span>{' '}
                 of{' '}
-                <span className="font-semibold text-slate-800">{MOCK_PROJECTS.length}</span>{' '}
+                <span className="font-semibold text-slate-800">{projects.length}</span>{' '}
                 projects
               </p>
 
@@ -260,8 +306,25 @@ export default function Projects() {
               </div>
             </div>
 
-            {/* Empty state */}
-            {sorted.length === 0 ? (
+            {/* Loading state */}
+            {loading ? (
+              <div className="text-center py-28">
+                <Loader2 className="w-10 h-10 mx-auto text-violet-500 animate-spin mb-4" />
+                <p className="text-slate-500 text-sm">Loading projects…</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-28">
+                <p className="text-6xl mb-5">⚠️</p>
+                <h2 className="text-xl font-bold text-slate-700 mb-2">Something went wrong</h2>
+                <p className="text-slate-400 text-sm mb-6">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : sorted.length === 0 ? (
               <div className="text-center py-28">
                 <p className="text-6xl mb-5">🔍</p>
                 <h2 className="text-xl font-bold text-slate-700 mb-2">No projects found</h2>

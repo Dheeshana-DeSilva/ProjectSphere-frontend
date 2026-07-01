@@ -1,13 +1,7 @@
-import axios from 'axios';
+import api from '../config/api.js';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const STORAGE_KEY = 'projectsphere_student_projects';
-
-const api = API_BASE_URL
-  ? axios.create({
-      baseURL: API_BASE_URL,
-    })
-  : null;
+const USE_BACKEND = import.meta.env.VITE_API_BASE_URL ? true : false;
 
 const readProjects = () => {
   try {
@@ -59,8 +53,13 @@ const toFormData = (project) => {
       return;
     }
 
+    if (key === 'technologies' && Array.isArray(value)) {
+      formData.append('technologies', value.join(','));
+      return;
+    }
+
     if (Array.isArray(value)) {
-      formData.append(key, JSON.stringify(value));
+      value.forEach(item => formData.append(key, item));
       return;
     }
 
@@ -72,40 +71,30 @@ const toFormData = (project) => {
   return formData;
 };
 
-const authHeaders = (token) => (
-  token && !token.startsWith('session-token-')
-    ? { Authorization: `Bearer ${token}` }
-    : {}
-);
-
 export async function getMyProjects(token, user) {
-  if (api) {
-    const { data } = await api.get('/my-projects', {
-      headers: authHeaders(token),
-    });
-    return data;
+  if (USE_BACKEND) {
+    const { data } = await api.get('/projects/my-projects');
+    return data.projects || [];
   }
 
   return readProjects().filter((project) => project.ownerId === (user?.id || 'demo-student'));
 }
 
 export async function getProjectById(id, token) {
-  if (api) {
-    const { data } = await api.get(`/projects/${id}`, {
-      headers: authHeaders(token),
-    });
-    return data;
+  if (USE_BACKEND) {
+    const { data } = await api.get(`/projects/${id}`);
+    return data.project || null;
   }
 
   return readProjects().find((project) => String(project.id) === String(id)) || null;
 }
 
 export async function createProject(project, token, user) {
-  if (api) {
+  if (USE_BACKEND) {
     const { data } = await api.post('/projects', toFormData(project), {
-      headers: authHeaders(token),
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
-    return data;
+    return data.project || data;
   }
 
   const projects = readProjects();
@@ -123,11 +112,11 @@ export async function createProject(project, token, user) {
 }
 
 export async function updateProject(id, project, token) {
-  if (api) {
+  if (USE_BACKEND) {
     const { data } = await api.put(`/projects/${id}`, toFormData(project), {
-      headers: authHeaders(token),
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
-    return data;
+    return data.project || data;
   }
 
   const projects = readProjects();
@@ -150,13 +139,32 @@ export async function updateProject(id, project, token) {
 }
 
 export async function deleteProject(id, token) {
-  if (api) {
-    await api.delete(`/projects/${id}`, {
-      headers: authHeaders(token),
-    });
+  if (USE_BACKEND) {
+    await api.delete(`/projects/${id}`);
     return true;
   }
 
   writeProjects(readProjects().filter((project) => String(project.id) !== String(id)));
   return true;
+}
+
+// Get all projects (for browse/search)
+export async function getAllProjects(filters = {}) {
+  if (USE_BACKEND) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const { data } = await api.get(`/projects${queryParams ? `?${queryParams}` : ''}`);
+    return data.projects || [];
+  }
+
+  return readProjects();
+}
+
+// Like/Unlike a project (Recruiter only)
+export async function likeProject(projectId) {
+  if (USE_BACKEND) {
+    const { data } = await api.post(`/projects/${projectId}/like`);
+    return data;
+  }
+
+  return { success: true, message: 'Feature not available in offline mode' };
 }

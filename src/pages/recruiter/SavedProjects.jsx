@@ -1,12 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark } from 'lucide-react';
-import { MOCK_PROJECTS_LIST } from '../../data/mockProjects';
+import { Bookmark, Loader2 } from 'lucide-react';
 import LikeButton from '../../components/recruiter/LikeButton';
 import SaveButton from '../../components/recruiter/SaveButton';
+import { getAllProjects } from '../../services/projectService';
+
+// ─── Normalise backend project shape ──────────────────────────────────────────
+function normaliseProject(p) {
+  return {
+    ...p,
+    id: p._id || p.id,
+    student: p.owner
+      ? { id: p.owner._id || p.owner, name: p.owner.name || 'Student', email: p.owner.email || '' }
+      : p.student || { id: '', name: 'Unknown', email: '' },
+    technologies: Array.isArray(p.technologies) ? p.technologies : [],
+    likes: typeof p.likes === 'number' ? p.likes : Array.isArray(p.likes) ? p.likes.length : 0,
+    description: p.description || '',
+  };
+}
 
 export default function SavedProjects() {
   const [savedProjectIds, setSavedProjectIds] = useState([]);
+  const [allProjects, setAllProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     try {
@@ -17,7 +33,28 @@ export default function SavedProjects() {
     }
   }, []);
 
-  const savedProjects = MOCK_PROJECTS_LIST.filter(p => savedProjectIds.includes(p.id));
+  // Fetch all projects from the API, then filter by saved IDs
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    getAllProjects()
+      .then(data => {
+        if (!cancelled) {
+          setAllProjects((data || []).map(normaliseProject));
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch projects:', err);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  const savedProjects = allProjects.filter(p => savedProjectIds.includes(p.id) || savedProjectIds.includes(p._id));
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4">
@@ -25,7 +62,12 @@ export default function SavedProjects() {
         <h1 className="text-3xl font-extrabold text-slate-800 mb-2">Saved Projects</h1>
         <p className="text-slate-500 mb-8">Projects you have bookmarked for later review.</p>
 
-        {savedProjects.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center">
+            <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />
+            <p className="text-slate-500 text-sm">Loading saved projects…</p>
+          </div>
+        ) : savedProjects.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center">
             <Bookmark className="w-16 h-16 text-slate-300 mb-4" />
             <h3 className="text-xl font-bold text-slate-700">No saved projects</h3>

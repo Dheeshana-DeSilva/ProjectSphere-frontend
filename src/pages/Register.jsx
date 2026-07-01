@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAlert } from '../hooks/useAlert.js';
 import { useAuth } from '../hooks/useAuth.js';
+import OTPVerification from '../components/auth/OTPVerification.jsx';
 
 const initialForm = {
   fullName: '',
   email: '',
   password: '',
-  role: 'student',
+  role: 'Student',
   studentId: '',
   department: '',
   customDepartment: '',
@@ -30,13 +31,23 @@ const departmentOptions = [
 function Register() {
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
+<<<<<<< Updated upstream
   const { showAlert } = useAlert();
+=======
+  const [showOTP, setShowOTP] = useState(false);
+  const [registrationEmail, setRegistrationEmail] = useState('');
+>>>>>>> Stashed changes
   const { dashboardPaths, register } = useAuth();
   const navigate = useNavigate();
 
   const updateField = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
+  };
+
+  const updateRole = (event) => {
+    const { value } = event.target;
+    setForm((current) => ({ ...current, role: value }));
   };
 
   const updateDepartment = (event) => {
@@ -57,14 +68,47 @@ function Register() {
         ...form,
         department: form.department === 'Other' ? form.customDepartment : form.department,
       });
+<<<<<<< Updated upstream
       showAlert({ type: 'success', title: 'Account created!', message: `Welcome to ProjectSphere, ${result.user.name}.` });
       navigate(dashboardPaths[result.user.role] || '/dashboard', { replace: true });
+=======
+      
+      // Check if OTP verification is required
+      if (result.requiresOTP) {
+        setRegistrationEmail(form.email);
+        setShowOTP(true);
+      } else if (result.user && result.token) {
+        // Direct login (no OTP required)
+        navigate('/', { replace: true });
+      }
+>>>>>>> Stashed changes
     } catch (err) {
       showAlert({ type: 'error', title: 'Registration failed', message: err.message });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleOTPSuccess = (user) => {
+    // Navigate to dashboard after successful OTP verification
+    navigate('/', { replace: true });
+  };
+
+  const handleOTPCancel = () => {
+    setShowOTP(false);
+    setRegistrationEmail('');
+  };
+
+  // Show OTP verification screen if needed
+  if (showOTP) {
+    return (
+      <OTPVerification
+        email={registrationEmail}
+        onSuccess={handleOTPSuccess}
+        onCancel={handleOTPCancel}
+      />
+    );
+  }
 
   return (
     <section className="auth-layout">
@@ -176,10 +220,10 @@ function Register() {
 
               <div className="form-field">
                 <label htmlFor="register-role">Account type</label>
-                <select id="register-role" name="role" value={form.role} onChange={updateField}>
-                  <option value="student">Student</option>
-                  <option value="lecturer">Lecturer</option>
-                  <option value="recruiter">Recruiter</option>
+                <select id="register-role" name="role" value={form.role} onChange={updateRole}>
+                  <option value="Student">Student</option>
+                  <option value="Lecturer">Lecturer</option>
+                  <option value="Recruiter">Recruiter</option>
                 </select>
               </div>
             </div>

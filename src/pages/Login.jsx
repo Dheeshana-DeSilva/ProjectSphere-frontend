@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAlert } from '../hooks/useAlert.js';
 import { useAuth } from '../hooks/useAuth.js';
@@ -17,8 +17,18 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const errorParam = params.get('error');
+    if (errorParam) {
+      setError(errorParam);
+      // Remove error from URL to prevent it from showing on refresh
+      navigate('/login', { replace: true });
+    }
+  }, [location, navigate]);
+
   const redirectAfterAuth = (role) => {
-    const fallback = dashboardPaths[role] || '/dashboard';
+    const fallback = '/';
     navigate(location.state?.from?.pathname || fallback, { replace: true });
   };
 

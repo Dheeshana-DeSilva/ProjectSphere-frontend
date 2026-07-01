@@ -31,12 +31,9 @@ const departmentOptions = [
 function Register() {
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
-<<<<<<< Updated upstream
   const { showAlert } = useAlert();
-=======
   const [showOTP, setShowOTP] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState('');
->>>>>>> Stashed changes
   const { dashboardPaths, register } = useAuth();
   const navigate = useNavigate();
 
@@ -68,10 +65,6 @@ function Register() {
         ...form,
         department: form.department === 'Other' ? form.customDepartment : form.department,
       });
-<<<<<<< Updated upstream
-      showAlert({ type: 'success', title: 'Account created!', message: `Welcome to ProjectSphere, ${result.user.name}.` });
-      navigate(dashboardPaths[result.user.role] || '/dashboard', { replace: true });
-=======
       
       // Check if OTP verification is required
       if (result.requiresOTP) {
@@ -79,9 +72,9 @@ function Register() {
         setShowOTP(true);
       } else if (result.user && result.token) {
         // Direct login (no OTP required)
-        navigate('/', { replace: true });
+        showAlert({ type: 'success', title: 'Account created!', message: `Welcome to ProjectSphere, ${result.user.name}.` });
+        navigate(dashboardPaths[result.user.role] || '/', { replace: true });
       }
->>>>>>> Stashed changes
     } catch (err) {
       showAlert({ type: 'error', title: 'Registration failed', message: err.message });
     } finally {
